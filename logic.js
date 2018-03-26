@@ -23,48 +23,45 @@ const EVENT_NAMES = {
   MODIFIER_DECK_SHUFFLE_REQUIRED: 'modfierDeckShuffleRequired',
 };
 
-function UICard(front_element, back_element) {
-  const card = {};
+class UICard {
+  constructor(front_element, back_element) {
+    this.back = back_element;
+    this.front = front_element;
+    this.flip_up(false);
+  }
 
-  card.back = back_element;
-  card.front = front_element;
-
-  card.flip_up = function (faceup) {
+  flip_up(faceup) {
     toggle_class(this.back, 'up', !faceup);
     toggle_class(this.back, 'down', faceup);
 
     toggle_class(this.front, 'up', faceup);
     toggle_class(this.front, 'down', !faceup);
-  };
+  }
 
-  card.set_depth = function (z) {
+  set_depth(z) {
     this.back.style.zIndex = z;
     this.front.style.zIndex = z;
-  };
+  }
 
-  card.push_down = function () {
+  push_down() {
     this.back.style.zIndex -= 1;
     this.front.style.zIndex -= 1;
-  };
+  }
 
-  card.addClass = function (class_name) {
+  addClass(class_name) {
     this.front.classList.add(class_name);
     this.back.classList.add(class_name);
-  };
+  }
 
-  card.removeClass = function (class_name) {
+  removeClass(class_name) {
     this.front.classList.remove(class_name);
     this.back.classList.remove(class_name);
-  };
+  }
 
-  card.attach = function (parent) {
+  attach(parent) {
     parent.appendChild(this.back);
     parent.appendChild(this.front);
-  };
-
-  card.flip_up(false);
-
-  return card;
+  }
 }
 
 function create_ability_card_back(name, level) {
