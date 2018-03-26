@@ -1,3 +1,10 @@
+import { DECK_DEFINITONS, DECKS } from './cards';
+import { attributes_to_lines, expand_string, immunities_to_lines, notes_to_lines, special_to_lines } from './macros';
+import { CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK } from './modifiers';
+import { MONSTER_STATS } from './monster_stats';
+import { SCENARIO_DEFINITIONS, SPECIAL_RULES } from './scenarios';
+import { concat_arrays, create_input, dict_values, find_in_discard, get_from_storage, input_value, is_checked, remove_child, remove_empty_strings, shuffle_list, toggle_class, write_to_storage } from './util';
+
 // TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attribtues are active at the beginning of the turn, and active after initiative)
 var do_shuffles = true;
 var visible_ability_decks = [];
@@ -158,7 +165,7 @@ function create_ability_card_front(initiative, name, shuffle, lines, attack, mov
       current_parent = list_item;
     }
 
-    text = expand_string(line.trim(), attack, move, range);
+    const text = expand_string(line.trim(), attack, move, range);
     current_parent.insertAdjacentHTML('beforeend', text);
   }
 
@@ -366,7 +373,6 @@ function reshuffle(deck, include_discards) {
   // This way we keep sync several decks from the same class
   visible_ability_decks.forEach((visible_deck) => {
     if ((visible_deck !== deck) && (visible_deck.class == deck.class)) {
-      var real_name = visible_deck.get_real_name();
       shuffle_deck(visible_deck, include_discards);
       visible_deck.set_card_piles(deck.draw_pile, deck.discard);
     }
@@ -409,7 +415,7 @@ function flip_up_top_card(deck) {
   }
 
   var card = deck.draw_pile.shift(card);
-  send_to_discard(card, pull_animation = true);
+  send_to_discard(card, true);
   deck.discard.unshift(card);
 }
 
@@ -492,7 +498,7 @@ function double_draw(deck) {
     advantage_card = deck.discard[0];
     reshuffle_modifier_deck(deck);
     advantage_card = deck.draw_pile.shift(advantage_card);
-    send_to_discard(advantage_card, pull_animation = false);
+    send_to_discard(advantage_card, false);
     deck.discard.unshift(advantage_card);
     draw_modifier_card(deck);
     // Case there were 0 cards in draw_pile when we clicked "draw 2".
@@ -516,7 +522,7 @@ function double_draw(deck) {
   deck.advantage_to_clean = true;
 }
 
-function load_modifier_deck(number_bless, number_curses) {
+function load_modifier_deck() {
   var deck =
         {
           name: 'Monster modifier deck',
@@ -809,7 +815,7 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
     label.id = `switch-${deckid}`;
     label.href = `#switch-${deckid}`;
     label.innerText = deck.get_real_name();
-    label.addEventListener('click', function (e) {
+    label.addEventListener('click', function () {
       var d = document.getElementById(this.id.replace('switch-', ''));
       d.className = (d.className == 'hiddendeck') ? 'card-container' : 'hiddendeck';
     }, false);
@@ -966,7 +972,7 @@ function DeckList() {
 
   var dom_dict = create_input('button', 'applylevel', 'Apply All', '');
   dom_dict.input.onclick = function () {
-    for (key in decklist.level_selectors) {
+    for (const key in decklist.level_selectors) {
       decklist.level_selectors[key].set_value(decklist.global_level_selector.get_selection());
     }
   };
@@ -974,7 +980,7 @@ function DeckList() {
 
   decklist.ul.appendChild(listitem);
 
-  for (key in DECKS) {
+  for (const key in DECKS) {
     var real_name = DECKS[key].name;
     var listitem = document.createElement('li');
     var dom_dict = create_input('checkbox', 'deck', real_name, real_name);
@@ -1082,7 +1088,7 @@ function ScenarioList(scenarios) {
   return scenariolist;
 }
 
-function init() {
+export function init() {
   var deckspage = document.getElementById('deckspage');
   var scenariospage = document.getElementById('scenariospage');
   var applydeckbtn = document.getElementById('applydecks');

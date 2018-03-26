@@ -1,5 +1,5 @@
 // special_rules should be treated with some kind of macro that recognises them and applies them when loading
-SPECIAL_RULES =
+export const SPECIAL_RULES =
 {
   living_corpse_two_levels_extra:
         {
@@ -10,7 +10,7 @@ SPECIAL_RULES =
 };
 
 
-SCENARIO_DEFINITIONS =
+export const SCENARIO_DEFINITIONS =
     [{
       name: '#1 Black Barrow',
       decks:

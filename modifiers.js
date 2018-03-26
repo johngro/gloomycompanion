@@ -1,4 +1,4 @@
-var CARD_TYPES_MODIFIER =
+export const CARD_TYPES_MODIFIER =
 {
   BLESS: 'bless',
   CURSE: 'curse',
@@ -11,7 +11,7 @@ var CARD_TYPES_MODIFIER =
   DOUBLE: 'double',
 };
 
-var MODIFIER_CARDS =
+export const MODIFIER_CARDS =
     {
       BLESS: { type: CARD_TYPES_MODIFIER.BLESS, shuffle: false, image: 'images/attack_mod_bless.jpg' },
       CURSE: { type: CARD_TYPES_MODIFIER.CURSE, shuffle: false, image: 'images/attack_mod_curse.jpg' },
@@ -24,7 +24,7 @@ var MODIFIER_CARDS =
       DOUBLE: { type: CARD_TYPES_MODIFIER.DOUBLE, shuffle: true, image: 'images/attack_mod_2x.jpg' },
     };
 
-var MODIFIER_DECK =
+export const MODIFIER_DECK =
     [MODIFIER_CARDS.PLUS0,
       MODIFIER_CARDS.PLUS0,
       MODIFIER_CARDS.PLUS0,

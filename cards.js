@@ -1,4 +1,4 @@
-DECKS =
+export const DECKS =
     {
       'Ancient Artillery': { name: 'Ancient Artillery', class: 'Ancient Artillery' },
       'Bandit Archer': { name: 'Bandit Archer', class: 'Archer' },
@@ -37,7 +37,7 @@ DECKS =
       'Wind Demon': { name: 'Wind Demon', class: 'Wind Demon' },
     };
 
-DECK_DEFINITONS =
+export const DECK_DEFINITONS =
 [
   {
     class: 'Ancient Artillery',

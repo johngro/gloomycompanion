@@ -1,5 +1,5 @@
 /* Macros used in card text, alphabetical order */
-MACROS =
+export const MACROS =
     {
       '%air%': "<img class='element' src='images/air.svg'>",
       '%any%': "<img class='element' src='images/any_element.svg'>",
@@ -94,7 +94,7 @@ function expand_stat(s, stat, value) {
   return s;
 }
 
-function attributes_to_lines(attributes) {
+export function attributes_to_lines(attributes) {
   if (!attributes || (attributes[0].length == 0 && attributes[1].length == 0)) {
     return [];
   }
@@ -130,7 +130,7 @@ function attributes_to_lines(attributes) {
   return attributes_lines.concat(elite_attributes_lines.map(line => (line ? `** <span class='elite-color'>${line.replace(/(,\s$)/g, '')}</span>` : '')));
 }
 
-function immunities_to_lines(immunities) {
+export function immunities_to_lines(immunities) {
   if (!immunities) {
     return [];
   }
@@ -146,17 +146,15 @@ function immunities_to_lines(immunities) {
   return ['* Immunities'].concat(immunities_lines.map(line => `** <span class='small'>${line.replace(/(,\s$)/g, '')}</span>`));
 }
 
-function notes_to_lines(notes) {
+export function notes_to_lines(notes) {
   return [`* <span class='small'> Notes: ${notes}</span>`];
 }
 
 function expand_special(s, special_value) {
-  var value = '';
-
   return special_value.map(line => (`* ${line}`));
 }
 
-function special_to_lines(s, special1, special2) {
+export function special_to_lines(s, special1, special2) {
   if (special1 && s.indexOf('Special 1') !== -1) {
     s = expand_special(s, special1);
   }
@@ -167,9 +165,10 @@ function special_to_lines(s, special1, special2) {
   return s;
 }
 
-function expand_string(s, attack, move, range) {
+export function expand_string(s, attack, move, range) {
   var re = new RegExp('%(attack|move|range)% (\\+|-)(\\d*)', 'g');
 
+  let found;
   while (found = re.exec(s)) {
     if (found[1] === 'attack') {
       s = s.replace(found[0], expand_stat(found[0], 'attack', attack));

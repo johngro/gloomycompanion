@@ -1,10 +1,10 @@
 
 
 function activate_tab(tabs, pages, activetab) {
-  for (key in tabs) {
+  for (const key in tabs) {
     tabs[key].className = (key == activetab) ? '' : 'inactive';
   }
-  for (key in pages) {
+  for (const key in pages) {
     pages[key].className = (key == activetab) ? 'tabbody' : 'inactive tabbody';
   }
 }
@@ -14,7 +14,7 @@ function show_settingspane(pane, cancelarea, show) {
   cancelarea.style.display = show ? 'initial' : 'none';
 }
 
-function init_ui() {
+export function init_ui() {
   var tabs =
     {
       scenarios: document.getElementById('scenariotab'),
@@ -26,26 +26,25 @@ function init_ui() {
       decks: document.getElementById('deckspage'),
     };
 
-  settingspane = document.getElementById('settingspane');
-  settingsbtn = document.getElementById('settingsbtn');
-  cancelarea = document.getElementById('cancelarea');
+  const settingspane = document.getElementById('settingspane');
+  const settingsbtn = document.getElementById('settingsbtn');
+  const cancelarea = document.getElementById('cancelarea');
 
-  scenariotab.onclick = function (e) {
+  tabs.scenarios.onclick = function () {
     activate_tab(tabs, pages, 'scenarios');
   };
 
-  deckstab.onclick = function (e) {
+  tabs.decks.onclick = function () {
     activate_tab(tabs, pages, 'decks');
   };
 
-  settingsbtn.onclick = function (e) {
+  settingsbtn.onclick = function () {
     show_settingspane(settingspane, cancelarea, true);
   };
 
-  cancelarea.onclick = function (e) {
+  cancelarea.onclick = function () {
     show_settingspane(settingspane, cancelarea, false);
   };
 
   activate_tab(tabs, pages, 'scenarios');
 }
-
