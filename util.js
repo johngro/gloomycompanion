@@ -1,9 +1,9 @@
 
 export function shuffle_list(l) {
-  for (var i = 0; i < l.length - 1; i++) {
+  for (let i = 0; i < l.length - 1; i += 1) {
     // Based on https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#Implementation_errors
-    var switch_index = i + Math.floor(Math.random() * (l.length - i));
-    var tmp = l[switch_index];
+    const switch_index = i + Math.floor(Math.random() * (l.length - i));
+    const tmp = l[switch_index];
     l[switch_index] = l[i];
     l[i] = tmp;
   }
@@ -24,14 +24,14 @@ export function remove_child(myNode) {
 }
 
 export function create_input(type, name, value, text) {
-  var input = document.createElement('input');
+  const input = document.createElement('input');
   input.type = type;
   input.name = name;
   input.value = value;
 
-  var textnode = document.createTextNode(text);
+  const textnode = document.createTextNode(text);
 
-  var label = document.createElement('label');
+  const label = document.createElement('label');
   label.appendChild(input);
   label.appendChild(textnode);
 
@@ -39,7 +39,7 @@ export function create_input(type, name, value, text) {
 }
 
 export function dict_values(dict) {
-  var values = [];
+  const values = [];
   for (const key in dict) {
     values.push(dict[key]);
   }
@@ -73,7 +73,7 @@ export function get_from_storage(name) {
 }
 
 export function find_in_discard(discard, id) {
-  for (var i = 0; i < discard.length; i++) {
+  for (let i = 0; i < discard.length; i += 1) {
     if (discard[i].id === id) {
       return discard[i];
     }

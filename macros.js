@@ -49,7 +49,7 @@ export const MACROS =
     };
 
 function expand_macro(macro) {
-  var key = macro.toLowerCase();
+  const key = macro.toLowerCase();
   if (key in MACROS) {
     return MACROS[key];
   }
@@ -58,33 +58,33 @@ function expand_macro(macro) {
 }
 
 function expand_stat(s, stat, value) {
-  var re = new RegExp(`%${stat}% (\\+|-)(\\d*)`, 'g');
-  var line_parsed = re.exec(s);
+  let re = new RegExp(`%${stat}% (\\+|-)(\\d*)`, 'g');
+  const line_parsed = re.exec(s);
 
-  var has_elite_value = (value.length == 2);
-  var normal_attack = value[0];
+  const has_elite_value = (value.length == 2);
+  let normal_attack = value[0];
   // Check in case of bosses with text in the attack (C+1)
   re = new RegExp('(\\d*)(\\+|-)?([a-zA-Z]+)', 'i');
-  var extra_text_for_particular_bosses = '';
-  var value_parsed = re.exec(String(normal_attack));
+  let extra_text_for_particular_bosses = '';
+  const value_parsed = re.exec(String(normal_attack));
   if (value_parsed && value_parsed[3]) {
-    var symbol = (value_parsed[2] == '-') ? '-' : '+';
+    const symbol = (value_parsed[2] == '-') ? '-' : '+';
     extra_text_for_particular_bosses = value_parsed[3] + symbol;
     normal_attack = (value_parsed[1] !== '') ? parseInt(value_parsed[1]) : 0;
   }
 
   if (line_parsed) {
     if (line_parsed[1] === '+') {
-      var value_normal = normal_attack + parseInt(line_parsed[2]);
+      const value_normal = normal_attack + parseInt(line_parsed[2]);
       if (has_elite_value) {
-        var value_elite = value[1] + parseInt(line_parsed[2]);
+        const value_elite = value[1] + parseInt(line_parsed[2]);
         return (`%${stat}% ${value_normal} / <span class='elite-color'>${value_elite}</span>`);
       }
       return (`%${stat}% ${extra_text_for_particular_bosses}${value_normal}`);
     } else if (line_parsed[1] === '-') {
-      var value_normal = normal_attack - parseInt(line_parsed[2]);
+      const value_normal = normal_attack - parseInt(line_parsed[2]);
       if (has_elite_value) {
-        var value_elite = value[1] - parseInt(line_parsed[2]);
+        const value_elite = value[1] - parseInt(line_parsed[2]);
         return (`%${stat}% ${value_normal} / <span class='elite-color'>${value_elite}</span>`);
       }
       return (`%${stat}% ${extra_text_for_particular_bosses}${value_normal}`);
@@ -99,31 +99,31 @@ export function attributes_to_lines(attributes) {
     return [];
   }
   // To make it more readable, group 3 elements in the same row abd naje them small
-  var attributes_lines = ['* Attributes'];
+  let attributes_lines = ['* Attributes'];
 
   // Write common attributes in white
-  var normal_attributes_lines = [];
-  var line = 0;
-  for (var i = 0; i < attributes[0].length; i++) {
+  const normal_attributes_lines = [];
+  let line = 0;
+  for (let i = 0; i < attributes[0].length; i += 1) {
     normal_attributes_lines[line] = normal_attributes_lines[line] ? `${normal_attributes_lines[line] + attributes[0][i]}, ` : `${attributes[0][i]}, `;
     if ((i + 1) % 3 == 0) {
-      line++;
+      line += 1;
     }
   }
   attributes_lines = attributes_lines.concat(normal_attributes_lines.map(line => (line ? `**${line.replace(/(,\s$)/g, '')}` : '')));
 
   // Write elite attributes in Gold
-  var elite_attributes_lines = [];
+  const elite_attributes_lines = [];
   // TODO
   // In case we want to show Common and Elite only attributes
   // var elite_attributes = attributes[1].map(function(elite_attribute){
   //     return ((attributes[0].indexOf(elite_attribute) == -1) ? elite_attribute: "")
   // });
   line = 0;
-  for (var i = 0; i < attributes[1].length; i++) {
+  for (let i = 0; i < attributes[1].length; i += 1) {
     elite_attributes_lines[line] = elite_attributes_lines[line] ? `${elite_attributes_lines[line] + attributes[1][i]}, ` : `${attributes[1][i]}, `;
     if ((i + 1) % 3 == 0) {
-      line++;
+      line += 1;
     }
   }
 
@@ -135,12 +135,12 @@ export function immunities_to_lines(immunities) {
     return [];
   }
   // To make it more readable, group 3 elements in the same row abd naje them small
-  var immunities_lines = [];
-  var line = 0;
-  for (var i = 0; i < immunities.length; i++) {
+  const immunities_lines = [];
+  let line = 0;
+  for (let i = 0; i < immunities.length; i += 1) {
     immunities_lines[line] = immunities_lines[line] ? `${immunities_lines[line] + immunities[i]}, ` : `${immunities[i]}, `;
     if ((i + 1) % 3 == 0) {
-      line++;
+      line += 1;
     }
   }
   return ['* Immunities'].concat(immunities_lines.map(line => `** <span class='small'>${line.replace(/(,\s$)/g, '')}</span>`));
@@ -166,10 +166,10 @@ export function special_to_lines(s, special1, special2) {
 }
 
 export function expand_string(s, attack, move, range) {
-  var re = new RegExp('%(attack|move|range)% (\\+|-)(\\d*)', 'g');
+  const re = new RegExp('%(attack|move|range)% (\\+|-)(\\d*)', 'g');
 
   let found;
-  while (found = re.exec(s)) {
+  while ((found = re.exec(s))) {
     if (found[1] === 'attack') {
       s = s.replace(found[0], expand_stat(found[0], 'attack', attack));
     } else if (found[1] === 'move') {

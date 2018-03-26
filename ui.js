@@ -15,12 +15,12 @@ function show_settingspane(pane, cancelarea, show) {
 }
 
 export function init_ui() {
-  var tabs =
+  const tabs =
     {
       scenarios: document.getElementById('scenariotab'),
       decks: document.getElementById('deckstab'),
     };
-  var pages =
+  const pages =
     {
       scenarios: document.getElementById('scenariospage'),
       decks: document.getElementById('deckspage'),
