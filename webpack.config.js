@@ -25,4 +25,10 @@ module.exports = {
       },
     ],
   },
+
+  serve: {
+    dev: {
+      publicPath: '/dist/',
+    },
+  },
 };
