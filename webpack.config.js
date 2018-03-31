@@ -14,16 +14,25 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.jsx?$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env'],
+            cacheDirectory: true,
+            presets: ['@babel/preset-env', '@babel/preset-react'],
           },
         },
       },
     ],
+  },
+  resolve: {
+    extensions: ['.js', '.json', '.jsx'],
+  },
+
+  externals: {
+    react: 'React',
+    'react-dom': 'ReactDOM',
   },
 
   serve: {

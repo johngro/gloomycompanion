@@ -2,7 +2,7 @@
   "env": {
     "browser": true
   },
-  "extends": "airbnb-base",
+  "extends": "airbnb",
   "rules": {
     "camelcase": 0,
     "eqeqeq": 0,
