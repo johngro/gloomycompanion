@@ -169,56 +169,58 @@ function create_ability_card_front(initiative, name, shuffle, lines, attack, mov
   return card;
 }
 
-function load_ability_deck(deck_class, deck_name, level) {
-  const deck_definition = deck_definitions[deck_class];
-  deck_definition.name = deck_name;
-  deck_definition.level = level;
+class AbilityDeck {
+  constructor(deck_class, deck_name, level) {
+    const deck_definition = deck_definitions[deck_class];
+    deck_definition.name = deck_name;
+    deck_definition.level = level;
 
-  const loaded_deck = JSON.parse(get_from_storage(deck_name));
+    const loaded_deck = JSON.parse(get_from_storage(deck_name));
 
+    this.class = deck_definition.class;
+    this.name = deck_definition.name;
+    this.type = DECK_TYPES.ABILITY;
+    this.draw_pile = [];
+    this.discard = [];
+    this.move = [0, 0];
+    this.attack = [0, 0];
+    this.range = [0, 0];
+    this.level = deck_definition.level;
+    this.health = [0, 0];
 
-  const deck = {
-    class: deck_definition.class,
-    name: deck_definition.name,
-    type: DECK_TYPES.ABILITY,
-    draw_pile: [],
-    discard: [],
-    move: [0, 0],
-    attack: [0, 0],
-    range: [0, 0],
-    level: deck_definition.level,
-    health: [0, 0],
-  };
+    for (let i = 0; i < deck_definition.cards.length; i += 1) {
+      const definition = deck_definition.cards[i];
+      const shuffle = definition[0];
+      const initiative = definition[1];
+      const lines = definition.slice(2);
 
-  for (let i = 0; i < deck_definition.cards.length; i += 1) {
-    const definition = deck_definition.cards[i];
-    const shuffle = definition[0];
-    const initiative = definition[1];
-    const lines = definition.slice(2);
+      const empty_front = document.createElement('div');
+      empty_front.className = 'card ability front down';
+      const card_front = empty_front;
+      const card_back = create_ability_card_back(this.name, this.level);
 
-    const empty_front = document.createElement('div');
-    empty_front.className = 'card ability front down';
-    const card_front = empty_front;
-    const card_back = create_ability_card_back(deck.name, deck.level);
+      const card = {
+        id: `${this.name}_${i}`,
+        ui: new UICard(card_front, card_back),
+        shuffle_next: shuffle,
+        initiative,
+        starting_lines: lines,
+      };
 
-    const card = {
-      id: `${deck.name}_${i}`,
-      ui: new UICard(card_front, card_back),
-      shuffle_next: shuffle,
-      initiative,
-      starting_lines: lines,
-    };
-
-    card.paint_front_card = function (name, lines, attack, move, range, level, health) {
-      this.ui.front = create_ability_card_front(this.initiative, name, this.shuffle_next, lines, attack, move, range, level, health);
-    };
-    if (loaded_deck && find_in_discard(loaded_deck.discard, card.id)) {
-      deck.discard.push(card);
-    } else {
-      deck.draw_pile.push(card);
+      card.paint_front_card = function (name, lines, attack, move, range, level, health) {
+        this.ui.front = create_ability_card_front(this.initiative, name, this.shuffle_next, lines, attack, move, range, level, health);
+      };
+      if (loaded_deck && find_in_discard(loaded_deck.discard, card.id)) {
+        this.discard.push(card);
+      } else {
+        this.draw_pile.push(card);
+      }
     }
+
+    write_to_storage(this.name, JSON.stringify(this));
   }
-  deck.draw_top_discard = function () {
+
+  draw_top_discard() {
     if (this.discard.length > 0) {
       const card = this.discard[this.discard.length - 1];
       let cards_lines = card.starting_lines;
@@ -226,7 +228,7 @@ function load_ability_deck(deck_class, deck_name, level) {
       if (this.is_boss()) {
         let new_lines = [];
         cards_lines.forEach((line) => {
-          new_lines = new_lines.concat(special_to_lines(line, deck.special1, deck.special2));
+          new_lines = new_lines.concat(special_to_lines(line, this.special1, this.special2));
         });
         cards_lines = new_lines;
         if (this.immunities) {
@@ -248,15 +250,15 @@ function load_ability_deck(deck_class, deck_name, level) {
       card.ui.addClass('discard');
     }
     force_repaint_deck(this);
-  };
+  }
 
-  deck.draw_top_card = function () {
+  draw_top_card() {
     let cards_lines = this.draw_pile[0].starting_lines;
     let extra_lines = [];
     if (this.is_boss()) {
       let new_lines = [];
       cards_lines.forEach((line) => {
-        new_lines = new_lines.concat(special_to_lines(line, deck.special1, deck.special2));
+        new_lines = new_lines.concat(special_to_lines(line, this.special1, this.special2));
       });
       cards_lines = new_lines;
       if (this.immunities) {
@@ -271,9 +273,9 @@ function load_ability_deck(deck_class, deck_name, level) {
 
     this.draw_pile[0].paint_front_card(this.get_real_name(), cards_lines.concat(extra_lines), this.attack, this.move, this.range, this.level, this.health);
     force_repaint_deck(this);
-  };
+  }
 
-  deck.must_reshuffle = function () {
+  must_reshuffle() {
     if (!this.draw_pile.length) {
       return true;
     }
@@ -281,17 +283,17 @@ function load_ability_deck(deck_class, deck_name, level) {
       return this.discard[0].shuffle_next;
     }
     return false;
-  };
+  }
 
-  deck.set_stats_monster = function (stats) {
+  set_stats_monster(stats) {
     this.attack = stats.attack;
     this.move = stats.move;
     this.range = stats.range;
     this.attributes = stats.attributes;
     this.health = stats.health;
-  };
+  }
 
-  deck.set_stats_boss = function (stats) {
+  set_stats_boss(stats) {
     this.attack = stats.attack;
     this.move = stats.move;
     this.range = stats.range;
@@ -300,17 +302,17 @@ function load_ability_deck(deck_class, deck_name, level) {
     this.immunities = stats.immunities;
     this.notes = stats.notes;
     this.health = stats.health;
-  };
+  }
 
-  deck.get_real_name = function () {
+  get_real_name() {
     return (this.name) ? this.name : this.class;
-  };
+  }
 
-  deck.is_boss = function () {
+  is_boss() {
     return this.class == DECKS.Boss.class;
-  };
+  }
 
-  deck.set_card_piles = function (draw_pile, discard_pile) {
+  set_card_piles(draw_pile, discard_pile) {
     for (let i = 0; i < draw_pile.length; i += 1) {
       this.draw_pile[i].shuffle_next = draw_pile[i].shuffle_next;
       this.draw_pile[i].initiative = draw_pile[i].initiative;
@@ -321,10 +323,11 @@ function load_ability_deck(deck_class, deck_name, level) {
       this.discard[i].initiative = discard_pile[i].initiative;
       this.discard[i].starting_lines = discard_pile[i].starting_lines;
     }
-  };
+  }
+}
 
-  write_to_storage(deck.name, JSON.stringify(deck));
-  return deck;
+function load_ability_deck(deck_class, deck_name, level) {
+  return new AbilityDeck(deck_class, deck_name, level);
 }
 
 function place_deck(deck, container) {
@@ -520,17 +523,35 @@ function double_draw(deck) {
   deck.advantage_to_clean = true;
 }
 
-function load_modifier_deck() {
-  const deck =
-        {
-          name: 'Monster modifier deck',
-          type: DECK_TYPES.MODIFIER,
-          draw_pile: [],
-          discard: [],
-          advantage_to_clean: false,
-        };
+class ModifierDeck {
+  constructor() {
+    this.name = 'Monster modifier deck';
+    this.type = DECK_TYPES.MODIFIER;
+    this.draw_pile = [];
+    this.discard = [];
+    this.advantage_to_clean = false;
 
-  deck.draw_top_discard = function () {
+    // FIXME: Not clearly necessary
+    this.count = this.count.bind(this);
+    this.remove_card = this.remove_card.bind(this);
+    this.add_card = this.add_card.bind(this);
+    this.shuffle_end_of_round = this.shuffle_end_of_round.bind(this);
+    this.must_reshuffle = this.must_reshuffle.bind(this);
+    this.clean_discard_pile = this.clean_discard_pile.bind(this);
+
+    const loaded_deck = JSON.parse(get_from_storage('modifier_deck'));
+
+    MODIFIER_DECK.forEach((card_definition) => {
+      const card = define_modifier_card(card_definition);
+      if (loaded_deck && find_in_discard_and_remove(loaded_deck.discard, card.card_type)) {
+        this.discard.push(card);
+      } else {
+        this.draw_pile.push(card);
+      }
+    });
+  }
+
+  draw_top_discard() {
     if (this.discard.length > 0) {
       const card = this.discard[this.discard.length - 1];
       card.ui.set_depth(-3);
@@ -540,51 +561,51 @@ function load_modifier_deck() {
       card.ui.addClass('discard');
     }
     force_repaint_deck(this);
-  };
+  }
 
-  deck.count = function (card_type) {
+  count(card_type) {
     return (this.draw_pile.filter(card => card.card_type === card_type).length);
-  }.bind(deck);
+  }
 
-  deck.remove_card = function (card_type) {
-    for (let i = 0; i < deck.draw_pile.length; i += 1) {
-      if (deck.draw_pile[i].card_type == card_type) {
-        deck.draw_pile.splice(i, 1);
-        reshuffle(deck, false);
+  remove_card(card_type) {
+    for (let i = 0; i < this.draw_pile.length; i += 1) {
+      if (this.draw_pile[i].card_type == card_type) {
+        this.draw_pile.splice(i, 1);
+        reshuffle(this, false);
 
-        force_repaint_deck(deck);
+        force_repaint_deck(this);
         break;
       }
     }
     write_to_storage('modifier_deck', JSON.stringify(modifier_deck));
 
     return this.count(card_type);
-  }.bind(deck);
+  }
 
-  deck.add_card = function (card_type) {
+  add_card(card_type) {
     // Rulebook p. 23: "a maximum of only 10 curse [and 10 bless] cards can be placed into any one deck"
     if (this.count(card_type) < 10) {
       // TOOD: Brittle
-      deck.draw_pile.push(define_modifier_card(MODIFIER_CARDS[card_type.toUpperCase()]));
+      this.draw_pile.push(define_modifier_card(MODIFIER_CARDS[card_type.toUpperCase()]));
 
-      force_repaint_deck(deck);
-      reshuffle(deck, false);
+      force_repaint_deck(this);
+      reshuffle(this, false);
     }
     write_to_storage('modifier_deck', JSON.stringify(modifier_deck));
 
     return this.count(card_type);
-  }.bind(deck);
+  }
 
-  deck.shuffle_end_of_round = function () {
+  shuffle_end_of_round() {
     return this.discard.filter(card => card.shuffle_next_round).length > 0;
-  }.bind(deck);
+  }
 
-  deck.must_reshuffle = function () {
+  must_reshuffle() {
     return !this.draw_pile.length;
-  }.bind(deck);
+  }
 
-  deck.clean_discard_pile = function () {
-    for (let i = 0; i < deck.discard.length; i += 1) {
+  clean_discard_pile() {
+    for (let i = 0; i < this.discard.length; i += 1) {
       if (this.discard[i].card_type == CARD_TYPES_MODIFIER.BLESS
                 || this.discard[i].card_type == CARD_TYPES_MODIFIER.CURSE) {
         // Delete this curse/bless that has been used
@@ -595,29 +616,17 @@ function load_modifier_deck() {
 
     // This is needed every time we update
     force_repaint_deck(this);
-  }.bind(deck);
+  }
 
-  deck.clean_advantage_deck = function () {
-    if ((deck.advantage_to_clean) && deck.discard[1]) {
-      deck.advantage_to_clean = false;
-      deck.discard[0].ui.removeClass('right');
-      deck.discard[0].ui.removeClass('left');
-      deck.discard[1].ui.removeClass('left');
-      deck.discard[1].ui.removeClass('left');
+  clean_advantage_deck() {
+    if ((this.advantage_to_clean) && this.discard[1]) {
+      this.advantage_to_clean = false;
+      this.discard[0].ui.removeClass('right');
+      this.discard[0].ui.removeClass('left');
+      this.discard[1].ui.removeClass('left');
+      this.discard[1].ui.removeClass('left');
     }
-  };
-  const loaded_deck = JSON.parse(get_from_storage('modifier_deck'));
-
-  MODIFIER_DECK.forEach((card_definition) => {
-    const card = define_modifier_card(card_definition);
-    if (loaded_deck && find_in_discard_and_remove(loaded_deck.discard, card.card_type)) {
-      deck.discard.push(card);
-    } else {
-      deck.draw_pile.push(card);
-    }
-  });
-
-  return deck;
+  }
 }
 
 function find_in_discard_and_remove(discard, card_type) {
@@ -825,7 +834,7 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
 }
 
 function init_modifier_deck() {
-  modifier_deck = load_modifier_deck(0, 0);
+  modifier_deck = new ModifierDeck();
 }
 
 function count_type(type, deck) {
