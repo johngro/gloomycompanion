@@ -1,9 +1,17 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+
 import { DECK_DEFINITONS, DECKS } from './cards';
-import { attributes_to_lines, expand_string, immunities_to_lines, notes_to_lines, special_to_lines } from './macros';
+import { attributes_to_lines, immunities_to_lines, notes_to_lines, special_to_lines } from './macros';
 import { CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK } from './modifiers';
 import { MONSTER_STATS } from './monster_stats';
 import { SCENARIO_DEFINITIONS, SPECIAL_RULES } from './scenarios';
-import { concat_arrays, create_input, dict_values, find_in_discard, get_from_storage, input_value, is_checked, remove_child, remove_empty_strings, shuffle_list, toggle_class, write_to_storage } from './util';
+import { concat_arrays, create_input, dict_values, find_in_discard, get_from_storage, input_value, is_checked, remove_child, shuffle_list, write_to_storage } from './util';
+
+import AbilityCardBack from './AbilityCardBack';
+import AbilityCardFront from './AbilityCardFront';
+import Card from './Card';
+import ModifierCardFront from './ModifierCardFront';
 
 // TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attribtues are active at the beginning of the turn, and active after initiative)
 const do_shuffles = true;
@@ -22,152 +30,6 @@ const EVENT_NAMES = {
   MODIFIER_CARD_DRAWN: 'modifierCardDrawn',
   MODIFIER_DECK_SHUFFLE_REQUIRED: 'modfierDeckShuffleRequired',
 };
-
-class UICard {
-  constructor(front_element, back_element) {
-    this.back = back_element;
-    this.front = front_element;
-    this.flip_up(false);
-  }
-
-  flip_up(faceup) {
-    toggle_class(this.back, 'up', !faceup);
-    toggle_class(this.back, 'down', faceup);
-
-    toggle_class(this.front, 'up', faceup);
-    toggle_class(this.front, 'down', !faceup);
-  }
-
-  set_depth(z) {
-    this.back.style.zIndex = z;
-    this.front.style.zIndex = z;
-  }
-
-  push_down() {
-    this.back.style.zIndex -= 1;
-    this.front.style.zIndex -= 1;
-  }
-
-  addClass(class_name) {
-    this.front.classList.add(class_name);
-    this.back.classList.add(class_name);
-  }
-
-  removeClass(class_name) {
-    this.front.classList.remove(class_name);
-    this.back.classList.remove(class_name);
-  }
-
-  attach(parent) {
-    parent.appendChild(this.back);
-    parent.appendChild(this.front);
-  }
-}
-
-function create_ability_card_back(name, level) {
-  const card = document.createElement('div');
-  card.className = 'card ability back down';
-
-  const name_span = document.createElement('span');
-  name_span.className = 'name';
-  name_span.innerText = `${name}-${level}`;
-  card.appendChild(name_span);
-
-  return card;
-}
-
-function create_ability_card_front(initiative, name, shuffle, lines, attack, move, range, level, health) {
-  const card = document.createElement('div');
-  card.className = 'card ability front down';
-
-  const name_span = document.createElement('span');
-  name_span.className = 'name';
-  name_span.innerText = `${name}-${level}`;
-  card.appendChild(name_span);
-
-
-  const healthNormal_span = document.createElement('span');
-  healthNormal_span.className = 'healthNormal';
-  healthNormal_span.innerText = `HP ${health[0]}`;
-  card.appendChild(healthNormal_span);
-
-  if (health[1] > 0) {
-    const healthElite_span = document.createElement('span');
-    healthElite_span.className = 'healthElite';
-    healthElite_span.innerText = `HP ${health[1]}`;
-    card.appendChild(healthElite_span);
-  }
-
-
-  const initiative_span = document.createElement('span');
-  initiative_span.className = 'initiative';
-  initiative_span.innerText = initiative;
-  card.appendChild(initiative_span);
-
-  if (shuffle) {
-    const shuffle_img = document.createElement('img');
-    shuffle_img.src = 'images/shuffle.svg';
-    card.appendChild(shuffle_img);
-  }
-
-  let current_depth = 0;
-  let current_parent = card;
-
-  lines = remove_empty_strings(lines);
-  for (let i = 0; i < lines.length; i += 1) {
-    let line = lines[i];
-
-    let new_depth = 0;
-    while (line.indexOf('*') >= 0) {
-      new_depth += 1;
-      line = line.substr(1);
-    }
-    const diff = new_depth - current_depth;
-
-    while (current_depth != new_depth) {
-      if (diff > 0) {
-        // Need one level lower, create <ul>
-        const list = document.createElement('ul');
-        // Dynamically adapt the size to the line length. I found this the sweet spot to read all the cards
-        if (lines.length > 5) {
-          list.style.fontSize = `${100 - (lines.length * 2.5)}%`;
-        }
-        current_parent.appendChild(list);
-        current_parent = list;
-
-        // Create <li>
-        const list_item = document.createElement('li');
-        current_parent.appendChild(list_item);
-        current_parent = list_item;
-
-        current_depth += 1;
-      } else {
-        // Need to go up in the list, pop <li>
-        current_parent = current_parent.parentElement;
-
-        // pop <ul>
-        current_parent = current_parent.parentElement;
-
-        current_depth -= 1;
-      }
-    }
-
-    if ((current_depth > 0) && (diff <= 0)) {
-      // Same level, pop the previous <li>
-      current_parent = current_parent.parentElement;
-
-      // create sibling <li>
-      const list_item = document.createElement('li');
-      current_parent.appendChild(list_item);
-      current_parent = list_item;
-    }
-
-    const text = expand_string(line.trim(), attack, move, range);
-    current_parent.insertAdjacentHTML('beforeend', text);
-  }
-
-  return card;
-}
 
 class AbilityDeck {
   constructor(deck_class, deck_name, level) {
@@ -194,21 +56,47 @@ class AbilityDeck {
       const initiative = definition[1];
       const lines = definition.slice(2);
 
-      const empty_front = document.createElement('div');
-      empty_front.className = 'card ability front down';
-      const card_front = empty_front;
-      const card_back = create_ability_card_back(this.name, this.level);
-
       const card = {
         id: `${this.name}_${i}`,
-        ui: new UICard(card_front, card_back),
+        domNode: document.createElement('div'),
         shuffle_next: shuffle,
         initiative,
         starting_lines: lines,
+        // FIXME: Clean this up
+        toJSON: () => ({
+          id: card.id,
+          shuffle_next: card.shuffle_next,
+          initiative: card.initiative,
+          starting_lines: card.starting_lines,
+        }),
       };
 
-      card.paint_front_card = function (name, lines, attack, move, range, level, health) {
-        this.ui.front = create_ability_card_front(this.initiative, name, this.shuffle_next, lines, attack, move, range, level, health);
+      const doRender = (renderFront) => {
+        const element = React.createElement(Card, {
+          deckType: 'ability',
+          renderBack: () => React.createElement(AbilityCardBack, {
+            name: this.name,
+            level: this.level,
+          }),
+          renderFront,
+        });
+
+        card.ui = ReactDOM.render(element, card.domNode);
+      };
+      doRender(() => null);
+
+      card.paint_front_card = (name, lines, attack, move, range, level, health) => {
+        doRender(() => React.createElement(AbilityCardFront, {
+          initiative: card.initiative,
+          name,
+          shuffle: card.shuffle_next,
+          lines,
+          attack,
+          move,
+          range,
+          level,
+          health,
+        }));
       };
       if (loaded_deck && find_in_discard(loaded_deck.discard, card.id)) {
         this.discard.push(card);
@@ -333,11 +221,11 @@ function load_ability_deck(deck_class, deck_name, level) {
 function place_deck(deck, container) {
   for (let i = 0; i < deck.draw_pile.length; i += 1) {
     const card = deck.draw_pile[i];
-    card.ui.attach(container);
+    container.appendChild(card.domNode);
   }
   for (let i = 0; i < deck.discard.length; i += 1) {
     const card = deck.discard[i];
-    card.ui.attach(container);
+    container.appendChild(card.domNode);
   }
   deck.deck_space = container;
 }
@@ -638,35 +526,26 @@ function find_in_discard_and_remove(discard, card_type) {
   return null;
 }
 
-function create_modifier_card_back() {
-  const card = document.createElement('div');
-  card.className = 'card modifier back';
-
-  return card;
-}
-
-function create_modifier_card_front(card_url) {
-  const img = document.createElement('img');
-  img.className = 'cover';
-  img.src = card_url;
-
-  const card = document.createElement('div');
-  card.className = 'card modifier front';
-  card.appendChild(img);
-
-  return card;
-}
-
 function define_modifier_card(card_definition) {
-  const card_front = create_modifier_card_front(card_definition.image);
-  const card_back = create_modifier_card_back();
-
   const card = {
-    ui: new UICard(card_front, card_back),
+    domNode: document.createElement('div'),
     card_type: card_definition.type,
     shuffle_next_round: card_definition.shuffle,
+    toJSON: () => ({
+      card_type: card.card_type,
+      shuffle_next_round: card.shuffle_next_round,
+    }),
   };
 
+  const element = React.createElement(Card, {
+    deckType: 'modifier',
+    renderBack: () => null,
+    renderFront: () => React.createElement(ModifierCardFront, {
+      image: card_definition.image,
+    }),
+  });
+
+  card.ui = ReactDOM.render(element, card.domNode);
   return card;
 }
 
