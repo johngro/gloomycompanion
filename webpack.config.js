@@ -1,6 +1,8 @@
 const path = require('path');
 
 module.exports = {
+  mode: process.env.WEBPACK_MODE || 'development',
+
   entry: './index',
   output: {
     filename: 'bundle.js',
@@ -20,6 +22,7 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             cacheDirectory: true,
+            plugins: ['@babel/plugin-proposal-object-rest-spread'],
             presets: ['@babel/preset-env', '@babel/preset-react'],
           },
         },
@@ -31,6 +34,7 @@ module.exports = {
   },
 
   externals: {
+    'prop-types': 'PropTypes',
     react: 'React',
     'react-dom': 'ReactDOM',
   },
