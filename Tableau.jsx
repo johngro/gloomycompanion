@@ -4,6 +4,8 @@ import ReactDOM from 'react-dom';
 
 import AbilityDeck from './AbilityDeck';
 import DeckState from './DeckState';
+import ModifierDeck from './ModifierDeck';
+import ModifierDeckState from './ModifierDeckState';
 import { DECK_DEFINITONS } from './cards';
 
 import { currentDeck } from './style/Tableau.scss';
@@ -58,6 +60,7 @@ export default class Tableau extends React.Component {
   state = {
     deckHidden: {},
     deckState: {},
+    modDeckState: ModifierDeckState.create(),
   }
 
   handleDeckClick(deckClass) {
@@ -68,6 +71,36 @@ export default class Tableau extends React.Component {
           deckState[deckClass].reshuffle() :
           deckState[deckClass].draw_card(),
       },
+    }));
+  }
+
+  handleModDeckDraw() {
+    this.setState(({ modDeckState }) => ({
+      modDeckState: modDeckState.draw_card()
+    }));
+  }
+
+  handleModDeckDoubleDraw() {
+    this.setState(({ modDeckState }) => ({
+      modDeckState: modDeckState.draw_two_cards()
+    }));
+  }
+
+  handleModDeckEndRound() {
+    this.setState(({ modDeckState }) => ({
+      modDeckState: modDeckState.end_round()
+    }));
+  }
+
+  handleModDeckAddSpecial(type) {
+    this.setState(({ modDeckState }) => ({
+      modDeckState: modDeckState.add_card(type)
+    }));
+  }
+
+  handleModDeckRemoveSpecial(type) {
+    this.setState(({ modDeckState }) => ({
+      modDeckState: modDeckState.remove_card(type)
     }));
   }
 
@@ -94,7 +127,14 @@ export default class Tableau extends React.Component {
           onToggleVisibility={this.handleToggleVisibility}
           target={document.getElementById('currentdeckslist')}
         />
-        <div id="modifier-container-container" />
+        <ModifierDeck
+          deckState={this.state.modDeckState}
+          onDrawClick={() => this.handleModDeckDraw()}
+          onDoubleDrawClick={() => this.handleModDeckDoubleDraw()}
+          onEndRoundClick={() => this.handleModDeckEndRound()}
+          onAddSpecialClick={(type) => this.handleModDeckAddSpecial(type)}
+          onRemoveSpecialClick={(type) => this.handleModDeckRemoveSpecial(type)}
+        />
         {decks}
       </React.Fragment>
     );
