@@ -215,10 +215,6 @@ class AbilityDeck {
   }
 }
 
-function load_ability_deck(deck_class, deck_name, level) {
-  return new AbilityDeck(deck_class, deck_name, level);
-}
-
 function place_deck(deck, container) {
   for (let i = 0; i < deck.draw_pile.length; i += 1) {
     const card = deck.draw_pile[i];
@@ -991,7 +987,7 @@ export function init() {
     localStorage.clear();
     const selected_deck_names = decklist.get_selected_decks();
     write_to_storage('selected_deck_names', JSON.stringify(selected_deck_names));
-    const selected_decks = selected_deck_names.map(deck_names => load_ability_deck(deck_names.class, deck_names.name, deck_names.level));
+    const selected_decks = selected_deck_names.map(deck_names => new AbilityDeck(deck_names.class, deck_names.name, deck_names.level));
     apply_deck_selection(selected_decks, true);
     const showmodifierdeck_deckspage = document.getElementById('showmodifierdeck-deckspage');
     const modifier_deck_section = document.getElementById('modifier-container');
@@ -1007,7 +1003,7 @@ export function init() {
     const selected_deck_names = scenariolist.get_scenario_decks();
     write_to_storage('selected_deck_names', JSON.stringify(selected_deck_names));
     decklist.set_selection(selected_deck_names);
-    const selected_decks = selected_deck_names.map(deck_names => load_ability_deck(deck_names.class, deck_names.name, deck_names.level));
+    const selected_decks = selected_deck_names.map(deck_names => new AbilityDeck(deck_names.class, deck_names.name, deck_names.level));
     apply_deck_selection(selected_decks, false);
     const modifier_deck_section = document.getElementById('modifier-container');
     if (!showmodifierdeck.checked) {
@@ -1020,7 +1016,7 @@ export function init() {
   applyloadbtn.onclick = function () {
     const selected_deck_names = JSON.parse(get_from_storage('selected_deck_names'));
     decklist.set_selection(selected_deck_names);
-    const selected_decks = selected_deck_names.map(deck_names => load_ability_deck(deck_names.class, deck_names.name, deck_names.level));
+    const selected_decks = selected_deck_names.map(deck_names => new AbilityDeck(deck_names.class, deck_names.name, deck_names.level));
     apply_deck_selection(selected_decks, true);
     const modifier_deck_section = document.getElementById('modifier-container');
     if (!showmodifierdeck.checked) {
