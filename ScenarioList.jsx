@@ -7,19 +7,13 @@ import { SCENARIO_DEFINITIONS, SPECIAL_RULES } from './scenarios';
 export default class ScenarioList extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      scenario: 0,
-    };
-
-    this.levelSelector = React.createRef();
-
+    this.state = { level: 1, scenario: 0 };
+    this.handleLevelChange = this.handleLevelChange.bind(this);
     this.handleScenarioChange = this.handleScenarioChange.bind(this);
   }
 
   get_scenario_decks() {
     const { decks, special_rules: specialRules = [] } = SCENARIO_DEFINITIONS[this.state.scenario];
-    const baseLevel = this.levelSelector.current.get_selection();
     return decks.map((deck) => {
       if (DECKS[deck.name]) {
         deck.class = DECKS[deck.name].class;
@@ -27,12 +21,16 @@ export default class ScenarioList extends React.Component {
         deck.class = DECKS.Boss.class;
       }
       if ((specialRules.indexOf(SPECIAL_RULES.living_corpse_two_levels_extra) >= 0) && (deck.name == SPECIAL_RULES.living_corpse_two_levels_extra.affected_deck)) {
-        deck.level = Math.min(7, (parseInt(baseLevel) + parseInt(SPECIAL_RULES.living_corpse_two_levels_extra.extra_levels)));
+        deck.level = Math.min(7, (this.state.level + parseInt(SPECIAL_RULES.living_corpse_two_levels_extra.extra_levels)));
       } else {
-        deck.level = baseLevel;
+        deck.level = this.state.level;
       }
       return deck;
     });
+  }
+
+  handleLevelChange(level) {
+    this.setState({ level });
   }
 
   handleScenarioChange(event) {
@@ -44,7 +42,11 @@ export default class ScenarioList extends React.Component {
   render() {
     return (
       <ul className="selectionlist">
-        <LevelSelector inline={false} text="Select level" ref={this.levelSelector} />
+        <LevelSelector inline={false}
+          text="Select level"
+          value={this.state.level}
+          onChange={this.handleLevelChange}
+        />
         <li>Select scenario number</li>
         <input
           max={SCENARIO_DEFINITIONS.length.toString()}

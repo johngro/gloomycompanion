@@ -7,22 +7,21 @@ export default class DeckList extends React.Component {
   constructor(props) {
     super(props);
 
-    this.globalLevelSelector = React.createRef();
-    this.levelSelectors = {};
-    this.state = { checked: new Set() };
+    this.state = { checked: new Set(), globalLevel: 1, levels: {} };
     for (const { name } of Object.values(DECKS)) {
-      this.levelSelectors[name] = React.createRef();
+      this.state.levels[name] = 1;
     }
 
     this.handleCheckedChange = this.handleCheckedChange.bind(this);
     this.handleGlobalApplyClick = this.handleGlobalApplyClick.bind(this);
+    this.handleGlobalLevelChange = globalLevel => this.setState({ globalLevel });
   }
 
   get_selected_decks() {
     const result = [];
     for (const name of this.state.checked) {
       const deck = DECKS[name];
-      deck.level = this.levelSelectors[name].current.get_selection();
+      deck.level = this.state.levels[name];
       result.push(deck);
     }
     return result;
@@ -32,9 +31,15 @@ export default class DeckList extends React.Component {
     // FIXME: "Boss: " names get filtered out
     selected_deck_names = selected_deck_names.filter(d => d.name in DECKS);
     for (const deck_names of selected_deck_names) {
-      this.levelSelectors[deck_names.name].current.set_value(deck_names.level);
+      this.setDeckLevel(deck_names.name, deck_names.level);
     }
     this.setState({ checked: new Set(selected_deck_names.map(d => d.name)) });
+  }
+
+  setDeckLevel(deckName, level) {
+    this.setState(({ levels }) => ({
+      levels: { ...levels, [deckName]: level },
+    }));
   }
 
   handleCheckedChange(event) {
@@ -52,8 +57,8 @@ export default class DeckList extends React.Component {
   }
 
   handleGlobalApplyClick() {
-    for (const selector of Object.values(this.levelSelectors)) {
-      selector.current.set_value(this.globalLevelSelector.current.get_selection());
+    for (const { name } of Object.values(DECKS)) {
+      this.setDeckLevel(name, this.state.globalLevel);
     }
   }
 
@@ -70,13 +75,23 @@ export default class DeckList extends React.Component {
           />
           {name}
         </label>
-        <LevelSelector inline text=" with level " ref={this.levelSelectors[name]} />
+        <LevelSelector
+          inline
+          text=" with level "
+          value={this.state.levels[name]}
+          onChange={level => this.setDeckLevel(name, level)}
+        />
       </li>
     ));
     return (
       <ul className="selectionlist">
         <li>
-          <LevelSelector inline text="Select global level" ref={this.globalLevelSelector} />
+          <LevelSelector
+            inline
+            text="Select global level"
+            value={this.state.globalLevel}
+            onChange={this.handleGlobalLevelChange}
+          />
           <input
             name="applylevel"
             type="button"
