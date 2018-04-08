@@ -11,6 +11,7 @@ import { concat_arrays, create_input, dict_values, find_in_discard, get_from_sto
 import AbilityCardBack from './AbilityCardBack';
 import AbilityCardFront from './AbilityCardFront';
 import Card from './Card';
+import LevelSelector from './LevelSelector';
 import ModifierCardFront from './ModifierCardFront';
 
 // TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attribtues are active at the beginning of the turn, and active after initiative)
@@ -815,33 +816,6 @@ function add_modifier_deck(container, deck, preserve_discards) {
   deck_space.onclick = draw_modifier_card.bind(null, deck);
 }
 
-function LevelSelector(text, inline) {
-  const max_level = 7;
-  const level = {};
-  level.html = inline ? document.createElement('span') : document.createElement('ul');
-  level.html.className = 'selectionlist';
-
-  const listitem = inline ? document.createElement('label') : document.createElement('li');
-  listitem.innerText = text;
-  level.html.appendChild(listitem);
-
-  const level_spinner = create_input('number', 'scenario_number', '1', '');
-  level_spinner.input.min = 0;
-  level_spinner.input.max = max_level;
-  level.html.appendChild(level_spinner.input);
-  level.spinner = level_spinner.input;
-
-  level.get_selection = function () {
-    return (this.spinner.value > max_level) ? max_level : this.spinner.value;
-  };
-
-  level.set_value = function (value) {
-    this.spinner.value = (value > max_level) ? max_level : value;
-  };
-
-  return level;
-}
-
 function DeckList() {
   const decklist = {};
   decklist.ul = document.createElement('ul');
@@ -852,9 +826,16 @@ function DeckList() {
 
 
   const listitem = document.createElement('li');
-  const global_level_selector = new LevelSelector('Select global level ', true);
-  listitem.appendChild(global_level_selector.html);
-  decklist.global_level_selector = global_level_selector;
+  ReactDOM.render(
+    React.createElement(LevelSelector, {
+      inline: true,
+      text: 'Select global level',
+      ref: (element) => {
+        decklist.global_level_selector = element;
+      },
+    }),
+    listitem,
+  );
 
   const dom_dict = create_input('button', 'applylevel', 'Apply All', '');
   dom_dict.input.onclick = function () {
@@ -872,12 +853,21 @@ function DeckList() {
     const dom_dict = create_input('checkbox', 'deck', real_name, real_name);
     listitem.appendChild(dom_dict.root);
 
-    const level_selector = new LevelSelector(' with level ', true);
-    listitem.appendChild(level_selector.html);
+    const levelSelectorSpan = document.createElement('span');
+    ReactDOM.render(
+      React.createElement(LevelSelector, {
+        inline: true,
+        text: ' with level ',
+        ref: (element) => {
+          decklist.level_selectors[real_name] = element;
+        },
+      }),
+      levelSelectorSpan,
+    );
+    listitem.appendChild(levelSelectorSpan);
 
     decklist.ul.appendChild(listitem);
     decklist.checkboxes[real_name] = dom_dict.input;
-    decklist.level_selectors[real_name] = level_selector;
   }
 
   decklist.get_selection = function () {
@@ -920,9 +910,18 @@ function ScenarioList(scenarios) {
   scenariolist.special_rules = {};
   scenariolist.level_selector = null;
 
-  scenariolist.level_selector = new LevelSelector('Select level', false);
-
-  scenariolist.ul.appendChild(scenariolist.level_selector.html);
+  const levelSelectorLi = document.createElement('li');
+  ReactDOM.render(
+    React.createElement(LevelSelector, {
+      inline: false,
+      text: 'Select level',
+      ref: (element) => {
+        scenariolist.level_selector = element;
+      },
+    }),
+    levelSelectorLi,
+  );
+  scenariolist.ul.appendChild(levelSelectorLi);
 
   for (let i = 0; i < scenarios.length; i += 1) {
     const scenario = scenarios[i];
