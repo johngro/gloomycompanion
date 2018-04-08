@@ -29,6 +29,8 @@ export default class DeckList extends React.Component {
   }
 
   set_selection(selected_deck_names) {
+    // FIXME: "Boss: " names get filtered out
+    selected_deck_names = selected_deck_names.filter(d => d.name in DECKS);
     for (const deck_names of selected_deck_names) {
       this.levelSelectors[deck_names.name].current.set_value(deck_names.level);
     }
