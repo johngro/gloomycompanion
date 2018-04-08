@@ -6,11 +6,12 @@ import { attributes_to_lines, immunities_to_lines, notes_to_lines, special_to_li
 import { CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK } from './modifiers';
 import { MONSTER_STATS } from './monster_stats';
 import { SCENARIO_DEFINITIONS, SPECIAL_RULES } from './scenarios';
-import { concat_arrays, create_input, dict_values, find_in_discard, get_from_storage, input_value, is_checked, remove_child, shuffle_list, write_to_storage } from './util';
+import { create_input, find_in_discard, get_from_storage, remove_child, shuffle_list, write_to_storage } from './util';
 
 import AbilityCardBack from './AbilityCardBack';
 import AbilityCardFront from './AbilityCardFront';
 import Card from './Card';
+import DeckList from './DeckList';
 import LevelSelector from './LevelSelector';
 import ModifierCardFront from './ModifierCardFront';
 
@@ -812,91 +813,6 @@ function add_modifier_deck(container, deck, preserve_discards) {
   deck_space.onclick = draw_modifier_card.bind(null, deck);
 }
 
-function DeckList() {
-  const decklist = {};
-  decklist.ul = document.createElement('ul');
-  decklist.ul.className = 'selectionlist';
-  decklist.checkboxes = {};
-  decklist.level_selectors = {};
-  decklist.global_level_selector = null;
-
-
-  const listitem = document.createElement('li');
-  ReactDOM.render(
-    React.createElement(LevelSelector, {
-      inline: true,
-      text: 'Select global level',
-      ref: (element) => {
-        decklist.global_level_selector = element;
-      },
-    }),
-    listitem,
-  );
-
-  const dom_dict = create_input('button', 'applylevel', 'Apply All', '');
-  dom_dict.input.onclick = function () {
-    for (const key in decklist.level_selectors) {
-      decklist.level_selectors[key].set_value(decklist.global_level_selector.get_selection());
-    }
-  };
-  listitem.appendChild(dom_dict.root);
-
-  decklist.ul.appendChild(listitem);
-
-  for (const key in DECKS) {
-    const real_name = DECKS[key].name;
-    const listitem = document.createElement('li');
-    const dom_dict = create_input('checkbox', 'deck', real_name, real_name);
-    listitem.appendChild(dom_dict.root);
-
-    const levelSelectorSpan = document.createElement('span');
-    ReactDOM.render(
-      React.createElement(LevelSelector, {
-        inline: true,
-        text: ' with level ',
-        ref: (element) => {
-          decklist.level_selectors[real_name] = element;
-        },
-      }),
-      levelSelectorSpan,
-    );
-    listitem.appendChild(levelSelectorSpan);
-
-    decklist.ul.appendChild(listitem);
-    decklist.checkboxes[real_name] = dom_dict.input;
-  }
-
-  decklist.get_selection = function () {
-    return dict_values(this.checkboxes).filter(is_checked).map(input_value);
-  };
-
-  decklist.get_selected_decks = function () {
-    const selected_checkbox = this.get_selection();
-    const selected_decks = concat_arrays(selected_checkbox.map((name) => {
-      const deck = ((name in DECKS) ? DECKS[name] : []);
-      deck.level = decklist.level_selectors[name].get_selection();
-      return deck;
-    }));
-    return selected_decks;
-  };
-
-  decklist.set_selection = function (selected_deck_names) {
-    dict_values(this.checkboxes).forEach((checkbox) => {
-      checkbox.checked = false;
-    });
-
-    selected_deck_names.forEach((deck_names) => {
-      const checkbox = this.checkboxes[deck_names.name];
-      if (checkbox) {
-        checkbox.checked = true;
-        decklist.level_selectors[deck_names.name].set_value(deck_names.level);
-      }
-    });
-  };
-
-  return decklist;
-}
-
 function ScenarioList(scenarios) {
   const scenariolist = {};
   scenariolist.ul = document.createElement('ul');
@@ -977,10 +893,17 @@ export function init() {
   const applyloadbtn = document.getElementById('applyload');
   const showmodifierdeck = document.getElementById('showmodifierdeck');
 
-  const decklist = new DeckList();
+  const decklistDiv = document.createElement('div');
+  let decklist;
+  ReactDOM.render(
+    React.createElement(DeckList, {
+      ref: (element) => { decklist = element; },
+    }),
+    decklistDiv,
+  );
   const scenariolist = new ScenarioList(SCENARIO_DEFINITIONS);
 
-  deckspage.insertAdjacentElement('afterbegin', decklist.ul);
+  deckspage.insertAdjacentElement('afterbegin', decklistDiv);
   scenariospage.insertAdjacentElement('afterbegin', scenariolist.ul);
 
   applydeckbtn.onclick = function () {

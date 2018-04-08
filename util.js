@@ -30,27 +30,6 @@ export function create_input(type, name, value, text) {
   return { root: label, input };
 }
 
-export function dict_values(dict) {
-  const values = [];
-  for (const key in dict) {
-    values.push(dict[key]);
-  }
-
-  return values;
-}
-
-export function concat_arrays(arrays) {
-  return Array.prototype.concat.apply([], arrays);
-}
-
-export function is_checked(input) {
-  return (('checked' in input) ? input.checked : false);
-}
-
-export function input_value(input) {
-  return (('value' in input) ? input.value : '');
-}
-
 export function remove_empty_strings(array) {
   return array.filter(Boolean);
 }
