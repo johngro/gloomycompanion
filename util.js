@@ -15,21 +15,6 @@ export function remove_child(myNode) {
   }
 }
 
-export function create_input(type, name, value, text) {
-  const input = document.createElement('input');
-  input.type = type;
-  input.name = name;
-  input.value = value;
-
-  const textnode = document.createTextNode(text);
-
-  const label = document.createElement('label');
-  label.appendChild(input);
-  label.appendChild(textnode);
-
-  return { root: label, input };
-}
-
 export function remove_empty_strings(array) {
   return array.filter(Boolean);
 }

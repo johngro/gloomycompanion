@@ -5,15 +5,14 @@ import { DECK_DEFINITONS, DECKS } from './cards';
 import { attributes_to_lines, immunities_to_lines, notes_to_lines, special_to_lines } from './macros';
 import { CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK } from './modifiers';
 import { MONSTER_STATS } from './monster_stats';
-import { SCENARIO_DEFINITIONS, SPECIAL_RULES } from './scenarios';
-import { create_input, find_in_discard, get_from_storage, remove_child, shuffle_list, write_to_storage } from './util';
+import { find_in_discard, get_from_storage, remove_child, shuffle_list, write_to_storage } from './util';
 
 import AbilityCardBack from './AbilityCardBack';
 import AbilityCardFront from './AbilityCardFront';
 import Card from './Card';
 import DeckList from './DeckList';
-import LevelSelector from './LevelSelector';
 import ModifierCardFront from './ModifierCardFront';
+import ScenarioList from './ScenarioList';
 
 // TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attribtues are active at the beginning of the turn, and active after initiative)
 const do_shuffles = true;
@@ -813,78 +812,6 @@ function add_modifier_deck(container, deck, preserve_discards) {
   deck_space.onclick = draw_modifier_card.bind(null, deck);
 }
 
-function ScenarioList(scenarios) {
-  const scenariolist = {};
-  scenariolist.ul = document.createElement('ul');
-  scenariolist.ul.className = 'selectionlist';
-  scenariolist.spinner = null;
-  scenariolist.decks = {};
-  scenariolist.special_rules = {};
-  scenariolist.level_selector = null;
-
-  const levelSelectorLi = document.createElement('li');
-  ReactDOM.render(
-    React.createElement(LevelSelector, {
-      inline: false,
-      text: 'Select level',
-      ref: (element) => {
-        scenariolist.level_selector = element;
-      },
-    }),
-    levelSelectorLi,
-  );
-  scenariolist.ul.appendChild(levelSelectorLi);
-
-  for (let i = 0; i < scenarios.length; i += 1) {
-    const scenario = scenarios[i];
-    scenariolist.decks[i] = scenario.decks;
-    scenariolist.special_rules[i] = scenario.special_rules ? scenario.special_rules : '';
-  }
-
-  const listitem = document.createElement('li');
-  listitem.innerText = 'Select scenario number';
-  scenariolist.ul.appendChild(listitem);
-
-  const scenario_spinner = create_input('number', 'scenario_number', '1', '');
-  scenario_spinner.input.min = 1;
-  scenario_spinner.input.max = scenarios.length;
-  scenariolist.ul.appendChild(scenario_spinner.input);
-  scenariolist.spinner = scenario_spinner.input;
-
-  scenariolist.get_selection = function () {
-    // We're using the scenario index that is zero-based, but the scenario list is 1-based
-    const current_value = scenariolist.spinner.value - 1;
-    return Math.min(current_value, scenarios.length + 1);
-  };
-
-  scenariolist.get_level = function (deck_name, special_rules) {
-    const base_level = scenariolist.level_selector.get_selection();
-
-    if ((special_rules.indexOf(SPECIAL_RULES.living_corpse_two_levels_extra) >= 0) && (deck_name == SPECIAL_RULES.living_corpse_two_levels_extra.affected_deck)) {
-      return Math.min(7, (parseInt(base_level) + parseInt(SPECIAL_RULES.living_corpse_two_levels_extra.extra_levels)));
-    }
-    return base_level;
-  };
-
-  scenariolist.get_scenario_decks = function () {
-    return (this.decks[this.get_selection()].map((deck) => {
-      if (DECKS[deck.name]) {
-        deck.class = DECKS[deck.name].class;
-      } else if (deck.name.indexOf('Boss') != -1) {
-        deck.class = DECKS.Boss.class;
-      }
-      deck.level = scenariolist.get_level(deck.name, scenariolist.get_special_rules());
-      return deck;
-    }));
-  };
-
-  scenariolist.get_special_rules = function () {
-    return this.special_rules[this.get_selection()];
-  };
-
-  return scenariolist;
-}
-
 export function init() {
   const deckspage = document.getElementById('deckspage');
   const scenariospage = document.getElementById('scenariospage');
@@ -901,10 +828,18 @@ export function init() {
     }),
     decklistDiv,
   );
-  const scenariolist = new ScenarioList(SCENARIO_DEFINITIONS);
+
+  const scenariolistDiv = document.createElement('div');
+  let scenariolist;
+  ReactDOM.render(
+    React.createElement(ScenarioList, {
+      ref: (element) => { scenariolist = element; },
+    }),
+    scenariolistDiv,
+  );
 
   deckspage.insertAdjacentElement('afterbegin', decklistDiv);
-  scenariospage.insertAdjacentElement('afterbegin', scenariolist.ul);
+  scenariospage.insertAdjacentElement('afterbegin', scenariolistDiv);
 
   applydeckbtn.onclick = function () {
     localStorage.clear();
