@@ -42,7 +42,8 @@ export default class ScenarioList extends React.Component {
   render() {
     return (
       <ul className="selectionlist">
-        <LevelSelector inline={false}
+        <LevelSelector
+          inline={false}
           text="Select level"
           value={this.state.level}
           onChange={this.handleLevelChange}

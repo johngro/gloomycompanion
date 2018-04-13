@@ -1,24 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { DECK_DEFINITONS, DECKS } from './cards';
-import { attributes_to_lines, immunities_to_lines, notes_to_lines, special_to_lines } from './macros';
 import { CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK } from './modifiers';
-import { MONSTER_STATS } from './monster_stats';
-import { find_in_discard, get_from_storage, remove_child, shuffle_list, write_to_storage } from './util';
+import { get_from_storage, remove_child, shuffle_list, write_to_storage } from './util';
 
-import AbilityCardBack from './AbilityCardBack';
-import AbilityCardFront from './AbilityCardFront';
 import Card from './Card';
 import DeckList from './DeckList';
 import ModifierCardFront from './ModifierCardFront';
 import ScenarioList from './ScenarioList';
+import Tableau from './Tableau';
 
 // TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attribtues are active at the beginning of the turn, and active after initiative)
-const do_shuffles = true;
 const visible_ability_decks = [];
 let modifier_deck = null;
-const deck_definitions = load_definition(DECK_DEFINITONS);
 
 const DECK_TYPES =
     {
@@ -31,189 +25,6 @@ const EVENT_NAMES = {
   MODIFIER_CARD_DRAWN: 'modifierCardDrawn',
   MODIFIER_DECK_SHUFFLE_REQUIRED: 'modfierDeckShuffleRequired',
 };
-
-class AbilityDeck {
-  constructor(deck_class, deck_name, level) {
-    const deck_definition = deck_definitions[deck_class];
-    deck_definition.name = deck_name;
-    deck_definition.level = level;
-
-    const loaded_deck = JSON.parse(get_from_storage(deck_name));
-
-    this.class = deck_definition.class;
-    this.name = deck_definition.name;
-    this.type = DECK_TYPES.ABILITY;
-    this.draw_pile = [];
-    this.discard = [];
-    this.move = [0, 0];
-    this.attack = [0, 0];
-    this.range = [0, 0];
-    this.level = deck_definition.level;
-    this.health = [0, 0];
-
-    for (let i = 0; i < deck_definition.cards.length; i += 1) {
-      const definition = deck_definition.cards[i];
-      const shuffle = definition[0];
-      const initiative = definition[1];
-      const lines = definition.slice(2);
-
-      const card = {
-        id: `${this.name}_${i}`,
-        domNode: document.createElement('div'),
-        shuffle_next: shuffle,
-        initiative,
-        starting_lines: lines,
-        // FIXME: Clean this up
-        toJSON: () => ({
-          id: card.id,
-          shuffle_next: card.shuffle_next,
-          initiative: card.initiative,
-          starting_lines: card.starting_lines,
-        }),
-      };
-
-      const doRender = (renderFront) => {
-        const element = React.createElement(Card, {
-          deckType: 'ability',
-          renderBack: () => React.createElement(AbilityCardBack, {
-            name: this.name,
-            level: this.level,
-          }),
-          renderFront,
-        });
-
-        card.ui = ReactDOM.render(element, card.domNode);
-      };
-      doRender(() => null);
-
-      card.paint_front_card = (name, lines, attack, move, range, level, health) => {
-        doRender(() => React.createElement(AbilityCardFront, {
-          initiative: card.initiative,
-          name,
-          shuffle: card.shuffle_next,
-          lines,
-          attack,
-          move,
-          range,
-          level,
-          health,
-        }));
-      };
-      if (loaded_deck && find_in_discard(loaded_deck.discard, card.id)) {
-        this.discard.push(card);
-      } else {
-        this.draw_pile.push(card);
-      }
-    }
-
-    write_to_storage(this.name, JSON.stringify(this));
-  }
-
-  draw_top_discard() {
-    if (this.discard.length > 0) {
-      const card = this.discard[this.discard.length - 1];
-      let cards_lines = card.starting_lines;
-      let extra_lines = [];
-      if (this.is_boss()) {
-        let new_lines = [];
-        cards_lines.forEach((line) => {
-          new_lines = new_lines.concat(special_to_lines(line, this.special1, this.special2));
-        });
-        cards_lines = new_lines;
-        if (this.immunities) {
-          extra_lines = extra_lines.concat(immunities_to_lines(this.immunities));
-        }
-        if (this.notes) {
-          extra_lines = extra_lines.concat(notes_to_lines(this.notes));
-        }
-      } else if (this.attributes) {
-        extra_lines = extra_lines.concat(attributes_to_lines(this.attributes));
-      }
-
-      card.paint_front_card(this.get_real_name(), cards_lines.concat(extra_lines), this.attack, this.move, this.range, this.level, this.health);
-
-      card.ui.set_depth(-3);
-      card.ui.addClass('pull');
-      card.ui.flip_up(true);
-      card.ui.removeClass('draw');
-      card.ui.addClass('discard');
-    }
-    force_repaint_deck(this);
-  }
-
-  draw_top_card() {
-    let cards_lines = this.draw_pile[0].starting_lines;
-    let extra_lines = [];
-    if (this.is_boss()) {
-      let new_lines = [];
-      cards_lines.forEach((line) => {
-        new_lines = new_lines.concat(special_to_lines(line, this.special1, this.special2));
-      });
-      cards_lines = new_lines;
-      if (this.immunities) {
-        extra_lines = extra_lines.concat(immunities_to_lines(this.immunities));
-      }
-      if (this.notes) {
-        extra_lines = extra_lines.concat(notes_to_lines(this.notes));
-      }
-    } else if (this.attributes) {
-      extra_lines = extra_lines.concat(attributes_to_lines(this.attributes));
-    }
-
-    this.draw_pile[0].paint_front_card(this.get_real_name(), cards_lines.concat(extra_lines), this.attack, this.move, this.range, this.level, this.health);
-    force_repaint_deck(this);
-  }
-
-  must_reshuffle() {
-    if (!this.draw_pile.length) {
-      return true;
-    }
-    if (do_shuffles && this.discard.length) {
-      return this.discard[0].shuffle_next;
-    }
-    return false;
-  }
-
-  set_stats_monster(stats) {
-    this.attack = stats.attack;
-    this.move = stats.move;
-    this.range = stats.range;
-    this.attributes = stats.attributes;
-    this.health = stats.health;
-  }
-
-  set_stats_boss(stats) {
-    this.attack = stats.attack;
-    this.move = stats.move;
-    this.range = stats.range;
-    this.special1 = stats.special1;
-    this.special2 = stats.special2;
-    this.immunities = stats.immunities;
-    this.notes = stats.notes;
-    this.health = stats.health;
-  }
-
-  get_real_name() {
-    return (this.name) ? this.name : this.class;
-  }
-
-  is_boss() {
-    return this.class == DECKS.Boss.class;
-  }
-
-  set_card_piles(draw_pile, discard_pile) {
-    for (let i = 0; i < draw_pile.length; i += 1) {
-      this.draw_pile[i].shuffle_next = draw_pile[i].shuffle_next;
-      this.draw_pile[i].initiative = draw_pile[i].initiative;
-      this.draw_pile[i].starting_lines = draw_pile[i].starting_lines;
-    }
-    for (let i = 0; i < discard_pile.length; i += 1) {
-      this.discard[i].shuffle_next = discard_pile[i].shuffle_next;
-      this.discard[i].initiative = discard_pile[i].initiative;
-      this.discard[i].starting_lines = discard_pile[i].starting_lines;
-    }
-  }
-}
 
 function place_deck(deck, container) {
   for (let i = 0; i < deck.draw_pile.length; i += 1) {
@@ -316,20 +127,6 @@ function send_to_discard(card, pull_animation) {
 
   card.ui.removeClass('draw');
   card.ui.addClass('discard');
-}
-
-function draw_ability_card(deck) {
-  if (deck.must_reshuffle()) {
-    reshuffle(deck, true);
-  } else {
-    visible_ability_decks.forEach((visible_deck) => {
-      if (visible_deck.class == deck.class) {
-        visible_deck.draw_top_card();
-        flip_up_top_card(visible_deck);
-      }
-    });
-  }
-  write_to_storage(deck.name, JSON.stringify(deck));
 }
 
 function prevent_pull_animation(deck) {
@@ -554,73 +351,26 @@ function end_round() {
   write_to_storage('modifier_deck', JSON.stringify(modifier_deck));
 }
 
-function load_definition(card_database) {
-  const decks = {};
-  for (let i = 0; i < card_database.length; i += 1) {
-    const definition = card_database[i];
-    decks[definition.class] = definition;
+function render_tableau(selected_deck_names, preserve) {
+  const tableauContainer = document.getElementById('tableau');
+
+  // If not preserving state, totally nuke the old tableau
+  if (!preserve) {
+    ReactDOM.unmountComponentAtNode(tableauContainer);
   }
 
-  return decks;
-}
+  // Render tableau (or update props)
+  ReactDOM.render(
+    React.createElement(Tableau, { selected_deck_names }),
+    tableauContainer,
+  );
 
-function get_monster_stats(name, level) {
-  const attack = [MONSTER_STATS.monsters[name].level[level].normal.attack,
-    MONSTER_STATS.monsters[name].level[level].elite.attack,
-  ];
-  const move = [MONSTER_STATS.monsters[name].level[level].normal.move,
-    MONSTER_STATS.monsters[name].level[level].elite.move,
-  ];
-  const range = [MONSTER_STATS.monsters[name].level[level].normal.range,
-    MONSTER_STATS.monsters[name].level[level].elite.range,
-  ];
-  const attributes = [MONSTER_STATS.monsters[name].level[level].normal.attributes,
-    MONSTER_STATS.monsters[name].level[level].elite.attributes,
-  ];
-
-  const health = [MONSTER_STATS.monsters[name].level[level].normal.health,
-    MONSTER_STATS.monsters[name].level[level].elite.health,
-  ];
-
-  return {
-    attack, move, range, attributes, health,
-  };
-}
-
-function get_boss_stats(name, level) {
-  name = name.replace('Boss: ', '');
-  const attack = [MONSTER_STATS.bosses[name].level[level].attack];
-  const move = [MONSTER_STATS.bosses[name].level[level].move];
-  const range = [MONSTER_STATS.bosses[name].level[level].range];
-  const special1 = MONSTER_STATS.bosses[name].level[level].special1;
-  const special2 = MONSTER_STATS.bosses[name].level[level].special2;
-  const immunities = MONSTER_STATS.bosses[name].level[level].immunities;
-  const notes = MONSTER_STATS.bosses[name].level[level].notes;
-  const health = [MONSTER_STATS.bosses[name].level[level].health];
-
-  return {
-    attack,
-    move,
-    range,
-    special1,
-    special2,
-    immunities,
-    notes,
-    health,
-  };
-}
-
-function apply_deck_selection(decks, preserve_existing_deck_state) {
-  const container = document.getElementById('tableau');
-  document.getElementById('currentdeckslist').innerHTML = '';
-  const decks_to_remove = visible_ability_decks.filter(visible_deck => !preserve_existing_deck_state || (decks.filter(deck => ((deck.name == visible_deck.name) && (deck.level == visible_deck.level))).length == 0));
-
-  const decks_to_add = decks.filter(deck => !preserve_existing_deck_state || (visible_ability_decks.filter(visible_deck => ((deck.name == visible_deck.name) && (deck.level == visible_deck.level))).length == 0));
-
-  if (!modifier_deck) {
+  // Inject non-Reactified modifier deck
+  if (!preserve || !modifier_deck) {
+    const mcc = document.getElementById('modifier-container-container');
     init_modifier_deck();
-    add_modifier_deck(container, modifier_deck, preserve_existing_deck_state);
-    if (preserve_existing_deck_state) {
+    add_modifier_deck(mcc, modifier_deck, false);
+    if (preserve) {
       const loaded_modifier_deck = JSON.parse(get_from_storage('modifier_deck'));
       const curses = count_type('curse', loaded_modifier_deck);
       const blessings = count_type('bless', loaded_modifier_deck);
@@ -634,76 +384,8 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
 
       document.body.dispatchEvent(new CustomEvent(EVENT_NAMES.MODIFIER_DECK_SHUFFLE_REQUIRED, { detail: { shuffle: modifier_deck.shuffle_end_of_round() } }));
     }
-  } else if (!preserve_existing_deck_state) {
-    container.removeChild(document.getElementById('modifier-container'));
-    init_modifier_deck();
-    add_modifier_deck(container, modifier_deck, preserve_existing_deck_state);
   }
   write_to_storage('modifier_deck', JSON.stringify(modifier_deck));
-
-  decks_to_remove.forEach((deck) => {
-    deck.discard_deck();
-  });
-
-  decks_to_add.forEach((deck) => {
-    const deckid = deck.get_real_name().replace(/\s+/g, '');
-    const deck_space = document.createElement('div');
-    deck_space.id = deckid;
-    deck_space.addEventListener('contextmenu', function (e) {
-      this.className = 'hiddendeck';
-      e.preventDefault();
-    }, false);
-    deck_space.className = 'card-container';
-
-    container.appendChild(deck_space);
-
-    place_deck(deck, deck_space);
-    reshuffle(deck, !preserve_existing_deck_state);
-    // if (preserve_existing_deck_state) {
-    //
-    // }
-    deck_space.onclick = draw_ability_card.bind(null, deck);
-
-    deck.discard_deck = function () {
-      const index = visible_ability_decks.indexOf(this);
-
-      if (index > -1) {
-        visible_ability_decks.splice(index, 1);
-      }
-
-      container.removeChild(deck_space);
-    };
-
-    if (deck.is_boss()) {
-      // We don't want stats if someone selects Boss on the deck tab
-      if (deck.get_real_name() != 'Boss') {
-        deck.set_stats_boss(get_boss_stats(deck.get_real_name(), deck.level));
-      }
-    } else {
-      deck.set_stats_monster(get_monster_stats(deck.get_real_name(), deck.level));
-    }
-    reshuffle(deck);
-    if (preserve_existing_deck_state) {
-      deck.draw_top_discard();
-    } else {
-      force_repaint_deck(deck);
-    }
-    visible_ability_decks.push(deck);
-
-    const currentdeckslist = document.getElementById('currentdeckslist');
-    const list_item = document.createElement('li');
-    list_item.className = 'currentdeck';
-    currentdeckslist.appendChild(list_item);
-    const label = document.createElement('a');
-    label.id = `switch-${deckid}`;
-    label.href = `#switch-${deckid}`;
-    label.innerText = deck.get_real_name();
-    label.addEventListener('click', function () {
-      const d = document.getElementById(this.id.replace('switch-', ''));
-      d.className = (d.className == 'hiddendeck') ? 'card-container' : 'hiddendeck';
-    }, false);
-    list_item.appendChild(label);
-  });
 
   // Rescale card text if necessary
   refresh_ui();
@@ -845,8 +527,7 @@ export function init() {
     localStorage.clear();
     const selected_deck_names = decklist.get_selected_decks();
     write_to_storage('selected_deck_names', JSON.stringify(selected_deck_names));
-    const selected_decks = selected_deck_names.map(deck_names => new AbilityDeck(deck_names.class, deck_names.name, deck_names.level));
-    apply_deck_selection(selected_decks, true);
+    render_tableau(selected_deck_names, true);
     const showmodifierdeck_deckspage = document.getElementById('showmodifierdeck-deckspage');
     const modifier_deck_section = document.getElementById('modifier-container');
     if (!showmodifierdeck_deckspage.checked) {
@@ -861,8 +542,7 @@ export function init() {
     const selected_deck_names = scenariolist.get_scenario_decks();
     write_to_storage('selected_deck_names', JSON.stringify(selected_deck_names));
     decklist.set_selection(selected_deck_names);
-    const selected_decks = selected_deck_names.map(deck_names => new AbilityDeck(deck_names.class, deck_names.name, deck_names.level));
-    apply_deck_selection(selected_decks, false);
+    render_tableau(selected_deck_names, false);
     const modifier_deck_section = document.getElementById('modifier-container');
     if (!showmodifierdeck.checked) {
       modifier_deck_section.style.display = 'none';
@@ -874,8 +554,7 @@ export function init() {
   applyloadbtn.onclick = function () {
     const selected_deck_names = JSON.parse(get_from_storage('selected_deck_names'));
     decklist.set_selection(selected_deck_names);
-    const selected_decks = selected_deck_names.map(deck_names => new AbilityDeck(deck_names.class, deck_names.name, deck_names.level));
-    apply_deck_selection(selected_decks, true);
+    render_tableau(selected_deck_names, true);
     const modifier_deck_section = document.getElementById('modifier-container');
     if (!showmodifierdeck.checked) {
       modifier_deck_section.style.display = 'none';

@@ -40,17 +40,19 @@ export default class Card extends React.Component {
   }
 
   render() {
-    const backClasses = new Set(this.state.classes);
+    const backClasses = new Set([...this.state.classes, ...this.props.classes]);
     backClasses.add('card');
     backClasses.add(this.props.deckType);
 
     const frontClasses = new Set(backClasses);
+    const faceUp = (this.props.faceUp !== null) ? this.props.faceUp : this.state.faceUp;
     frontClasses.add('front');
-    frontClasses.add(this.state.faceUp ? 'up' : 'down');
+    frontClasses.add(faceUp ? 'up' : 'down');
     backClasses.add('back');
-    backClasses.add(this.state.faceUp ? 'down' : 'up');
+    backClasses.add(faceUp ? 'down' : 'up');
 
-    const style = { zIndex: this.state.zIndex };
+    const zIndex = (this.props.zIndex !== null) ? this.props.zIndex : this.state.zIndex;
+    const style = { zIndex };
 
     return (
       <React.Fragment>
@@ -65,8 +67,17 @@ export default class Card extends React.Component {
   }
 }
 
+Card.defaultProps = {
+  classes: [],
+  faceUp: null,
+  zIndex: null,
+};
+
 Card.propTypes = {
+  classes: PropTypes.arrayOf(PropTypes.string),
   deckType: PropTypes.string.isRequired,
+  faceUp: PropTypes.bool,
   renderFront: PropTypes.func.isRequired,
   renderBack: PropTypes.func.isRequired,
+  zIndex: PropTypes.number,
 };
