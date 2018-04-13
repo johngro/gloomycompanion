@@ -360,8 +360,14 @@ function render_tableau(selected_deck_names, preserve) {
   }
 
   // Render tableau (or update props)
+  const deckSpecs = selected_deck_names.map(d => ({
+    id: (d.name || d.class).replace(/\s+/g, ''),
+    name: d.name || d.class,
+    class: d.class,
+    level: d.level,
+  }));
   ReactDOM.render(
-    React.createElement(Tableau, { selected_deck_names }),
+    React.createElement(Tableau, { deckSpecs }),
     tableauContainer,
   );
 

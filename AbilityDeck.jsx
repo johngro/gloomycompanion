@@ -9,7 +9,6 @@ import { attributes_to_lines, immunities_to_lines, notes_to_lines, special_to_li
 import { MONSTER_STATS } from './monster_stats';
 import { find_in_discard, shuffle_list } from './util';
 
-// XXX: Copy-and-pasted from logic.js
 const DEFINITIONS_BY_CLASS = {};
 for (const definition of DECK_DEFINITONS) {
   DEFINITIONS_BY_CLASS[definition.class] = definition;
@@ -60,6 +59,7 @@ class DeckState {
 export default class AbilityDeck extends React.Component {
   // FIXME: Reshuffle animation
   // FIXME: Implement state storage
+  // FIXME: Draw animation repeats when unhiding
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (prevState.deck && prevState.deck.name === nextProps.deckName) {
@@ -167,12 +167,12 @@ export default class AbilityDeck extends React.Component {
 
     const [topDraw] = this.state.deck.draw_pile;
     const [topDiscard, sndDiscard] = this.state.deck.discard;
-    let className = 'card-container';
-    if (this.props.hidden) {
-      className += ' hiddendeck';
-    }
     return (
-      <div id={this.props.id} className={className} onClick={this.handleClick}>
+      <div
+        id={this.props.id}
+        className={this.props.hidden ? 'hiddendeck' : 'card-container'}
+        onClick={this.handleClick}
+      >
         {topDraw ? renderCard(topDraw, -7, ['draw'], false) : null}
         {topDiscard ? renderCard(topDiscard, -3, ['discard', 'pull'], true) : null}
         {sndDiscard ? renderCard(sndDiscard, -4, ['discard', 'lift'], true) : null}
