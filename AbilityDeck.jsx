@@ -68,11 +68,20 @@ export default class AbilityDeck extends React.Component {
     return { deck: DeckState.create(DEFINITIONS_BY_CLASS[nextProps.deckClass], nextProps.deckName) };
   }
 
-  constructor(props) {
-    super(props);
-    this.state = {};
-    this.handleClick = this.handleClick.bind(this);
+  static defaultProps = {
+    hidden: false,
+    id: null,
   }
+
+  static propTypes = {
+    deckClass: PropTypes.string.isRequired,
+    deckName: PropTypes.string.isRequired,
+    level: PropTypes.number.isRequired,
+    hidden: PropTypes.bool,
+    id: PropTypes.string,
+  }
+
+  state = {}
 
   isBoss() {
     return this.props.deckClass === DECKS.Boss.class;
@@ -88,7 +97,7 @@ export default class AbilityDeck extends React.Component {
     return false;
   }
 
-  handleClick() {
+  handleClick = () => {
     if (this.mustReshuffle()) {
       this.setState(({ deck }) => ({ deck: deck.reshuffle() }));
     } else {
@@ -180,16 +189,3 @@ export default class AbilityDeck extends React.Component {
     );
   }
 }
-
-AbilityDeck.defaultProps = {
-  hidden: false,
-  id: null,
-};
-
-AbilityDeck.propTypes = {
-  deckClass: PropTypes.string.isRequired,
-  deckName: PropTypes.string.isRequired,
-  level: PropTypes.number.isRequired,
-  hidden: PropTypes.bool,
-  id: PropTypes.string,
-};

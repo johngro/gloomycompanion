@@ -2,13 +2,25 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 export default class Card extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      faceUp: false,
-      classes: new Set(),
-      zIndex: null,
-    };
+  static defaultProps = {
+    classes: [],
+    faceUp: null,
+    zIndex: null,
+  }
+
+  static propTypes = {
+    classes: PropTypes.arrayOf(PropTypes.string),
+    deckType: PropTypes.string.isRequired,
+    faceUp: PropTypes.bool,
+    renderFront: PropTypes.func.isRequired,
+    renderBack: PropTypes.func.isRequired,
+    zIndex: PropTypes.number,
+  }
+
+  state = {
+    faceUp: false,
+    classes: new Set(),
+    zIndex: null,
   }
 
   set_depth(z) {
@@ -66,18 +78,3 @@ export default class Card extends React.Component {
     );
   }
 }
-
-Card.defaultProps = {
-  classes: [],
-  faceUp: null,
-  zIndex: null,
-};
-
-Card.propTypes = {
-  classes: PropTypes.arrayOf(PropTypes.string),
-  deckType: PropTypes.string.isRequired,
-  faceUp: PropTypes.bool,
-  renderFront: PropTypes.func.isRequired,
-  renderBack: PropTypes.func.isRequired,
-  zIndex: PropTypes.number,
-};

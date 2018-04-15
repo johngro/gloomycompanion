@@ -5,12 +5,7 @@ import { DECKS } from './cards';
 import { SCENARIO_DEFINITIONS, SPECIAL_RULES } from './scenarios';
 
 export default class ScenarioList extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { level: 1, scenario: 0 };
-    this.handleLevelChange = this.handleLevelChange.bind(this);
-    this.handleScenarioChange = this.handleScenarioChange.bind(this);
-  }
+  state = { level: 1, scenario: 0 };
 
   get_scenario_decks() {
     const { decks, special_rules: specialRules = [] } = SCENARIO_DEFINITIONS[this.state.scenario];
@@ -29,11 +24,11 @@ export default class ScenarioList extends React.Component {
     });
   }
 
-  handleLevelChange(level) {
+  handleLevelChange = (level) => {
     this.setState({ level });
   }
 
-  handleScenarioChange(event) {
+  handleScenarioChange = (event) => {
     this.setState({
       scenario: Math.min(event.target.value - 1, SCENARIO_DEFINITIONS.length - 1),
     });

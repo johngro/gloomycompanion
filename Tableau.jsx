@@ -34,16 +34,17 @@ export default class Tableau extends React.Component {
     return { deckHidden };
   }
 
-  constructor(props) {
-    super(props);
-    this.deckRefs = {};
-    this.state = {
-      deckHidden: {},
-    };
-    this.handleToggleVisibility = this.handleToggleVisibility.bind(this);
+  static propTypes = {
+    deckSpecs: PropTypes.arrayOf(PropTypes.object).isRequired,
   }
 
-  handleToggleVisibility(deckId) {
+  state = {
+    deckHidden: {},
+  }
+
+  deckRefs = {}
+
+  handleToggleVisibility = (deckId) => {
     this.setState(({ deckHidden }) => ({
       deckHidden: { ...deckHidden, [deckId]: !deckHidden[deckId] },
     }));
@@ -80,7 +81,3 @@ export default class Tableau extends React.Component {
     );
   }
 }
-
-Tableau.propTypes = {
-  deckSpecs: PropTypes.arrayOf(PropTypes.object).isRequired,
-};

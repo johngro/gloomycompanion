@@ -4,17 +4,13 @@ import LevelSelector from './LevelSelector';
 import { DECKS } from './cards';
 
 export default class DeckList extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = { checked: new Set(), globalLevel: 1, levels: {} };
-    for (const { name } of Object.values(DECKS)) {
-      this.state.levels[name] = 1;
-    }
-
-    this.handleCheckedChange = this.handleCheckedChange.bind(this);
-    this.handleGlobalApplyClick = this.handleGlobalApplyClick.bind(this);
-    this.handleGlobalLevelChange = globalLevel => this.setState({ globalLevel });
+  state = {
+    checked: new Set(),
+    globalLevel: 1,
+    levels: Object.values(DECKS).reduce((levels, { name }) => {
+      levels[name] = 1;
+      return levels;
+    }, {}),
   }
 
   get_selected_decks() {
@@ -42,7 +38,7 @@ export default class DeckList extends React.Component {
     }));
   }
 
-  handleCheckedChange(event) {
+  handleCheckedChange = (event) => {
     const name = event.target.value;
     const isChecked = event.target.checked;
     this.setState(({ checked: oldChecked }) => {
@@ -56,11 +52,13 @@ export default class DeckList extends React.Component {
     });
   }
 
-  handleGlobalApplyClick() {
+  handleGlobalApplyClick = () => {
     for (const { name } of Object.values(DECKS)) {
       this.setDeckLevel(name, this.state.globalLevel);
     }
   }
+
+  handleGlobalLevelChange = globalLevel => this.setState({ globalLevel })
 
   render() {
     const deckElements = Object.values(DECKS).map(({ name }) => (
