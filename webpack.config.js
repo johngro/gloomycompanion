@@ -32,6 +32,7 @@ module.exports = {
         },
       },
       { test: /\.css$/, use: ['style-loader', 'css-loader', 'postcss-loader'] },
+      { test: /\.scss$/, use: ['style-loader', 'css-loader?modules', 'postcss-loader', 'sass-loader'] },
       { test: /\.svg$/, use: 'svg-url-loader?limit=8192' },
       { test: /\.(jpg|ttf)$/, use: 'url-loader?limit=8192' },
     ],

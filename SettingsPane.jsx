@@ -1,9 +1,12 @@
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
 import DeckList from './DeckList';
 import ScenarioList from './ScenarioList';
+
+import * as css from './style.scss';
 
 export default class SettingsPane extends React.Component {
   static propTypes = {
@@ -21,11 +24,11 @@ export default class SettingsPane extends React.Component {
   scenarioList = React.createRef();
 
   pageClass(tab) {
-    return `tabbody${tab === this.state.activeTab ? '' : ' inactive'}`;
+    return classNames(css.tabBody, { [css.inactive]: tab !== this.state.activeTab });
   }
 
   tabClass(tab) {
-    return tab === this.state.activeTab ? null : 'inactive';
+    return classNames({ [css.inactive]: tab !== this.state.activeTab });
   }
 
   handleApplyDecks = () => {
@@ -55,7 +58,7 @@ export default class SettingsPane extends React.Component {
     const settingsBtn = (
       <input
         alt="Configure"
-        id="settingsbtn"
+        id={css.settingsButton}
         type="image"
         src="images/settings.svg"
         onClick={this.handleShowSettings}
@@ -64,8 +67,8 @@ export default class SettingsPane extends React.Component {
 
     return (
       <React.Fragment>
-        <div className={this.state.visible ? 'pane' : 'pane inactive'}>
-          <ul className="tabcontainer">
+        <div className={this.state.visible ? css.pane : `${css.pane} ${css.inactive}`}>
+          <ul className={css.tabContainer}>
             <li
               className={this.tabClass('scenarios')}
               onClick={() => this.setState({ activeTab: 'scenarios' })}
@@ -98,7 +101,7 @@ export default class SettingsPane extends React.Component {
           </div>
         </div>
         <div
-          id="cancelarea"
+          id={css.cancelArea}
           style={{ display: this.state.visible ? 'initial' : 'none' }}
           onClick={this.handleHideSettings}
         />
