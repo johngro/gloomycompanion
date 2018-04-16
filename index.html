@@ -18,31 +18,10 @@
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.3.0/umd/react-dom.development.js"></script>
         <script type="text/javascript" src="./dist/bundle.js"></script>
     </head>
-    <body onload="Gloom.init(); Gloom.init_ui();">
-        <div class="panecontainer">
-            <div id="settingspane" class="pane expanded">
-                <ul class="tabcontainer">
-                    <li id="scenariotab">Scenario</li>
-                    <li id="deckstab">Decks</li>
-                </ul>
-                <div id="scenariospage" class="tabbody">
-                    <input id="showmodifierdeck" type="checkbox" checked /><label for="showmodifierdeck">Show Monster Modifier Deck</label>
-                    <br>
-                    <input id="applyscenario" type="button" value="Apply" />
-                    <br>
-                    <input id="applyload" type="button" value="Load Previous Scenario" />
-                    <br>
-                </div>
-                <div id="deckspage" class="tabbody">
-                    <input id="showmodifierdeck-deckspage" type="checkbox" checked /><label for="showmodifierdeck-deckspage">Show Monster Modifier Deck</label>
-                    <input id="applydecks" type="button" value="Apply" />
-                </div>
-            </div>
-            <div id="cancelarea">
-            </div>
-        </div>
+    <body onload="Gloom.init();">
+        <div id="panecontainer" class="panecontainer"></div>
         <div>
-            <input alt="Configure" id="settingsbtn" type="image" src="images/settings.svg" />
+            <div id="settingsbtncontainer"></div>
             <div id="currentdecks">
                 <ul id="currentdeckslist" class="currentdeckslist">
 

@@ -5,9 +5,8 @@ import { CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK } from './modifiers'
 import { get_from_storage, remove_child, shuffle_list, write_to_storage } from './util';
 
 import Card from './Card';
-import DeckList from './DeckList';
 import ModifierCardFront from './ModifierCardFront';
-import ScenarioList from './ScenarioList';
+import SettingsPane from './SettingsPane';
 import Tableau from './Tableau';
 
 // TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attribtues are active at the beginning of the turn, and active after initiative)
@@ -501,73 +500,20 @@ function add_modifier_deck(container, deck, preserve_discards) {
 }
 
 export function init() {
-  const deckspage = document.getElementById('deckspage');
-  const scenariospage = document.getElementById('scenariospage');
-  const applydeckbtn = document.getElementById('applydecks');
-  const applyscenariobtn = document.getElementById('applyscenario');
-  const applyloadbtn = document.getElementById('applyload');
-  const showmodifierdeck = document.getElementById('showmodifierdeck');
-
-  const decklistDiv = document.createElement('div');
-  let decklist;
   ReactDOM.render(
-    React.createElement(DeckList, {
-      ref: (element) => { decklist = element; },
+    React.createElement(SettingsPane, {
+      onSelectDecks: (selected_deck_names, showModifierDeck, preserve) => {
+        console.log(`oSD(..., ${showModifierDeck}, ${preserve})`);
+        localStorage.clear();
+        write_to_storage('selected_deck_names', JSON.stringify(selected_deck_names));
+        render_tableau(selected_deck_names, preserve);
+        const modifier_deck_section = document.getElementById('modifier-container');
+        modifier_deck_section.style.display = showModifierDeck ? 'block' : 'none';
+      },
+      loadFromStorage: () => JSON.parse(get_from_storage('selected_deck_names')),
     }),
-    decklistDiv,
+    document.getElementById('panecontainer'),
   );
-
-  const scenariolistDiv = document.createElement('div');
-  let scenariolist;
-  ReactDOM.render(
-    React.createElement(ScenarioList, {
-      ref: (element) => { scenariolist = element; },
-    }),
-    scenariolistDiv,
-  );
-
-  deckspage.insertAdjacentElement('afterbegin', decklistDiv);
-  scenariospage.insertAdjacentElement('afterbegin', scenariolistDiv);
-
-  applydeckbtn.onclick = function () {
-    localStorage.clear();
-    const selected_deck_names = decklist.get_selected_decks();
-    write_to_storage('selected_deck_names', JSON.stringify(selected_deck_names));
-    render_tableau(selected_deck_names, true);
-    const showmodifierdeck_deckspage = document.getElementById('showmodifierdeck-deckspage');
-    const modifier_deck_section = document.getElementById('modifier-container');
-    if (!showmodifierdeck_deckspage.checked) {
-      modifier_deck_section.style.display = 'none';
-    } else {
-      modifier_deck_section.style.display = 'block';
-    }
-  };
-
-  applyscenariobtn.onclick = function () {
-    localStorage.clear();
-    const selected_deck_names = scenariolist.get_scenario_decks();
-    write_to_storage('selected_deck_names', JSON.stringify(selected_deck_names));
-    decklist.set_selection(selected_deck_names);
-    render_tableau(selected_deck_names, false);
-    const modifier_deck_section = document.getElementById('modifier-container');
-    if (!showmodifierdeck.checked) {
-      modifier_deck_section.style.display = 'none';
-    } else {
-      modifier_deck_section.style.display = 'block';
-    }
-  };
-
-  applyloadbtn.onclick = function () {
-    const selected_deck_names = JSON.parse(get_from_storage('selected_deck_names'));
-    decklist.set_selection(selected_deck_names);
-    render_tableau(selected_deck_names, true);
-    const modifier_deck_section = document.getElementById('modifier-container');
-    if (!showmodifierdeck.checked) {
-      modifier_deck_section.style.display = 'none';
-    } else {
-      modifier_deck_section.style.display = 'block';
-    }
-  };
 
   window.onresize = refresh_ui.bind(null, visible_ability_decks);
 }

@@ -3,7 +3,7 @@ const path = require('path');
 module.exports = {
   mode: process.env.WEBPACK_MODE || 'development',
 
-  entry: './index',
+  entry: './logic',
   output: {
     filename: 'bundle.js',
     library: 'Gloom',
