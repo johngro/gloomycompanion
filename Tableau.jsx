@@ -3,6 +3,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import AbilityDeck from './AbilityDeck';
+import DeckState from './DeckState';
+import { DECK_DEFINITONS } from './cards';
+
+const DEFINITIONS_BY_CLASS = {};
+for (const definition of DECK_DEFINITONS) {
+  DEFINITIONS_BY_CLASS[definition.class] = definition;
+}
 
 function VisibilityMenu(props) {
   return ReactDOM.createPortal(props.deckSpecs.map(spec => (
@@ -24,14 +31,22 @@ VisibilityMenu.propTypes = {
 };
 
 export default class Tableau extends React.Component {
-  // FIXME: Decks with same class should be synchronized
+  // FIXME: Implement state storage
 
   static getDerivedStateFromProps(nextProps, prevState) {
     const deckHidden = {};
+    const deckState = {};
     for (const spec of nextProps.deckSpecs) {
       deckHidden[spec.id] = prevState.deckHidden[spec.id] || false;
+      if (!(spec.class in deckState)) {
+        if (spec.class in prevState.deckState) {
+          deckState[spec.class] = prevState.deckState[spec.class];
+        } else {
+          deckState[spec.class] = DeckState.create(DEFINITIONS_BY_CLASS[spec.class], spec.name);
+        }
+      }
     }
-    return { deckHidden };
+    return { deckHidden, deckState };
   }
 
   static propTypes = {
@@ -40,9 +55,19 @@ export default class Tableau extends React.Component {
 
   state = {
     deckHidden: {},
+    deckState: {},
   }
 
-  deckRefs = {}
+  handleDeckClick(deckClass) {
+    this.setState(({ deckState }) => ({
+      deckState: {
+        ...deckState,
+        [deckClass]: deckState[deckClass].mustReshuffle() ?
+          deckState[deckClass].reshuffle() :
+          deckState[deckClass].draw_card(),
+      },
+    }));
+  }
 
   handleToggleVisibility = (deckId) => {
     this.setState(({ deckHidden }) => ({
@@ -51,23 +76,15 @@ export default class Tableau extends React.Component {
   }
 
   render() {
-    const decks = this.props.deckSpecs.map((spec) => {
-      if (!(spec.id in this.deckRefs)) {
-        this.deckRefs[spec.id] = React.createRef();
-      }
-
-      return (
-        <AbilityDeck
-          id={spec.id}
-          key={spec.id}
-          deckClass={spec.class}
-          deckName={spec.name}
-          level={spec.level}
-          hidden={this.state.deckHidden[spec.id]}
-          ref={this.deckRefs[spec.id]}
-        />
-      );
-    });
+    const decks = this.props.deckSpecs.map(spec => (
+      <AbilityDeck
+        key={spec.id}
+        spec={spec}
+        deckState={this.state.deckState[spec.class]}
+        onClick={() => this.handleDeckClick(spec.class)}
+        hidden={this.state.deckHidden[spec.id]}
+      />
+    ));
     return (
       <React.Fragment>
         <VisibilityMenu
