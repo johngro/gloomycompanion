@@ -12,6 +12,13 @@
     "import/prefer-default-export": 0,
     "max-len": 0,
     "no-console": 0,
+    "import/no-extraneous-dependencies": ["error", {
+      "devDependencies": [
+        "postcss.config.js",
+        "webpack.config.js"
+      ],
+      "optionalDependencies": false
+    }],
     "no-param-reassign": 0,
     "no-restricted-syntax": 0,
     "no-shadow": 0,

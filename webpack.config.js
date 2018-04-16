@@ -9,6 +9,7 @@ module.exports = {
     library: 'Gloom',
     libraryTarget: 'umd',
     path: path.resolve(__dirname, 'dist'),
+    publicPath: '/dist/',
   },
 
   devtool: 'source-map',
@@ -30,6 +31,9 @@ module.exports = {
           },
         },
       },
+      { test: /\.css$/, use: ['style-loader', 'css-loader', 'postcss-loader'] },
+      { test: /\.svg$/, use: 'svg-url-loader?limit=8192' },
+      { test: /\.(jpg|ttf)$/, use: 'url-loader?limit=8192' },
     ],
   },
   resolve: {
@@ -41,10 +45,12 @@ module.exports = {
     react: 'React',
     'react-dom': 'ReactDOM',
   },
+};
 
-  serve: {
+if (process.env.WEBPACK_SERVE) {
+  module.exports.serve = {
     dev: {
       publicPath: '/dist/',
     },
-  },
-};
+  };
+}

@@ -9,6 +9,10 @@ import ModifierCardFront from './ModifierCardFront';
 import SettingsPane from './SettingsPane';
 import Tableau from './Tableau';
 
+// Import global styles for side effects
+import './cards.css';
+import './style.css';
+
 // TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attribtues are active at the beginning of the turn, and active after initiative)
 const visible_ability_decks = [];
 let modifier_deck = null;

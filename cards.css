@@ -22,7 +22,7 @@
     position:                   relative;
     text-align:                 center;
 
-    -webkit-box-flex:           1.0;
+    box-flex:                   1.0;
 
     width:                      453px;
     width:                      calc(437px + 1rem); /* 437px == card image width */
@@ -60,10 +60,6 @@
     border:                     none;
     overflow:                   visible;
     outline:                    none;
-
-    display:                    -webkit-flex;
-    -webkit-flex-direction:     row;
-    -webkit-justify-content:    center;
 
     display:                    flex;
     flex-direction:             row;
@@ -128,7 +124,7 @@
     height:                     20%;
 }
 
-.shuffle.not-required 
+.shuffle.not-required
 {
     opacity:                    0.2;
 }
@@ -148,12 +144,8 @@
         -1px 1px 0 #fff,
         1px 1px 0 #fff;
 
-  -webkit-touch-callout:        none; /* iOS Safari */
-    -webkit-user-select:        none; /* Safari */
-     -khtml-user-select:        none; /* Konqueror HTML */
-       -moz-user-select:        none; /* Firefox */
-        -ms-user-select:        none; /* Internet Explorer/Edge */
-            user-select:        none; /* Chrome/Opera */
+    touch-callout:              none; /* iOS Safari */
+    user-select:                none; /* Everything else */
 
     cursor: pointer;
 }
@@ -200,7 +192,6 @@
 {
     position:                   absolute;
 
-    -webkit-backface-visibility: hidden;
     backface-visibility:        hidden;
 
     color:                      white;
@@ -245,52 +236,42 @@
 
 @-webkit-keyframes pull-front
 {
-    0%                          { z-index: -3; -webkit-transform: translate3d(-1rem, -1rem, 1000px) rotateY(180deg); }
-    49%                         { z-index: -2; -webkit-transform: translate3d(-50%, -20%, 2000px)   rotateY(90deg); }
-    51%                         { z-index:  0; -webkit-transform: translate3d(-50%, -20%, 4000px)   rotateY(90deg); }
-    100%                        { z-index:  0; -webkit-transform: translate3d(0, 0, 4000px)         rotateY(0deg); }
+    0%                          { z-index: -3; transform: translate3d(-1rem, -1rem, 1000px) rotateY(180deg); }
+    49%                         { z-index: -2; transform: translate3d(-50%, -20%, 2000px)   rotateY(90deg); }
+    51%                         { z-index:  0; transform: translate3d(-50%, -20%, 4000px)   rotateY(90deg); }
+    100%                        { z-index:  0; transform: translate3d(0, 0, 4000px)         rotateY(0deg); }
 }
 
 @-webkit-keyframes pull-back
 {
-    0%                          { z-index: -3; -webkit-transform: translate3d(-1rem, -1rem, 1000px) rotateY(0deg); }
-    49%                         { z-index: -2; -webkit-transform: translate3d(-50%, -20%, 2000px)   rotateY(90deg); }
-    51%                         { z-index:  0; -webkit-transform: translate3d(-50%, -20%, 4000px)   rotateY(90deg); }
-    100%                        { z-index:  0; -webkit-transform: translate3d(0, 0, 4000px)         rotateY(180deg); }
+    0%                          { z-index: -3; transform: translate3d(-1rem, -1rem, 1000px) rotateY(0deg); }
+    49%                         { z-index: -2; transform: translate3d(-50%, -20%, 2000px)   rotateY(90deg); }
+    51%                         { z-index:  0; transform: translate3d(-50%, -20%, 4000px)   rotateY(90deg); }
+    100%                        { z-index:  0; transform: translate3d(0, 0, 4000px)         rotateY(180deg); }
 }
 
 @-webkit-keyframes lift
 {
-    0%                          { z-index: -1; -webkit-transform: translateZ(3000px); }
-    50%                         { z-index: -1; -webkit-transform: translateZ(3000px); }
+    0%                          { z-index: -1; transform: translateZ(3000px); }
+    50%                         { z-index: -1; transform: translateZ(3000px); }
     100%                        { z-index: -4; }
 }
 
 
 .card.front.pull
 {
-    -webkit-animation-name:     pull-front;
-    -webkit-animation-duration: 0.5s;
-
     animation-name:             pull-front;
     animation-duration:         0.5s;
 }
 
 .card.back.pull
 {
-    -webkit-animation-name:     pull-back;
-    -webkit-animation-duration: 0.5s;
-
     animation-name:             pull-back;
     animation-duration:         0.5s;
 }
 
 .card.lift
 {
-    -webkit-animation-name:     lift;
-    -webkit-animation-duration: 0.5s;
-    -webkit-animation-timing-function: step-start;
-
     animation-name:             lift;
     animation-duration:         0.5s;
     animation-timing-function:  step-start;
@@ -311,13 +292,7 @@
     bottom:                     1rem;
     right:                      1rem;
 
-    -webkit-transition-property: top,   left,   bottom, right,  -webkit-transform,  z-index;
-    -webkit-transition-duration: 0.4s,  0.4s,   0.4s,   0.4s,   0.4s,               0s;
-    -webkit-transition-delay:   0s,     0s,     0s,     0s,     0s,                 0.4s;
-
-    transition-property:        top,    left,   bottom, right,  transform,  z-index;
-    transition-duration:        0.4s,   0.4s,   0.4s,   0.4s,   0.4s,       0s;
-    transition-delay:           0s,     0s,     0s,     0s,     0s,         0.4s;
+    transition: top 0.4s, left 0.4s, bottom 0.4s, right 0.4s, transform 0.4s, z-index 0s 0.4s;
 }
 
 .card.ability.front
@@ -347,14 +322,12 @@
 .card.modifier.front.left img.cover
 {
     left:                       -25%;
-    -webkit-clip-path:          inset(0% 24.5% 0% 24.5%);
     clip-path:                  inset(0% 24.5% 0% 24.5%);
 }
 
 .card.modifier.front.right img.cover
 {
     left:                       25%;
-    -webkit-clip-path:          inset(0% 24.5% 0% 24.5%);
     clip-path:                  inset(0% 24.5% 0% 24.5%);
 }
 
@@ -377,15 +350,6 @@
     padding-top:                2.5em;
     box-sizing:                 border-box;
     overflow:                   hidden;
-
-    display:                    -webkit-box;
-    -webkit-box-orient:         vertical;
-    -webkit-box-align:          center;
-    -webkit-box-pack:           center;
-
-    display:                    -webkit-flex;
-    -webkit-flex-direction:     column;
-    -webkit-justify-content:    center;
 
     display:                    flex;
     flex-direction:             column;
@@ -422,13 +386,11 @@
 
 .mirrored
 {
-    -webkit-transform:          scale(-1,1);
     transform:                  scale(-1,1);
 }
 
 .rotated
 {
-    -webkit-transform:          rotateZ(-60deg);
     transform:                  rotateZ(-60deg);
 }
 
@@ -555,12 +517,10 @@ img[src="images/shuffle.svg"]
 
 .up
 {
-    -webkit-transform:          rotateY(0deg);
     transform:                  rotateY(0deg);
 }
 
 .down
 {
-    -webkit-transform:          rotateY(180deg);
     transform:                  rotateY(180deg);
 }
