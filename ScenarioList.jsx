@@ -4,6 +4,8 @@ import LevelSelector from './LevelSelector';
 import { DECKS } from './cards';
 import { SCENARIO_DEFINITIONS, SPECIAL_RULES } from './scenarios';
 
+import { selectionList } from './style/SettingsPane.scss';
+
 export default class ScenarioList extends React.Component {
   state = { level: 1, scenario: 0 };
 
@@ -36,7 +38,7 @@ export default class ScenarioList extends React.Component {
 
   render() {
     return (
-      <ul className="selectionlist">
+      <ul className={selectionList}>
         <LevelSelector
           inline={false}
           text="Select level"

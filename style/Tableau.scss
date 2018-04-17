@@ -1,0 +1,16 @@
+.current-deck {
+  $hover-color: #aaa;
+
+  float: left;
+
+  a {
+    display: block;
+    padding: 16px;
+    text-align: center;
+    text-decoration: none;
+
+    &:hover {
+      background-color: $hover-color;
+    }
+  }
+}

@@ -3,6 +3,8 @@ import React from 'react';
 import LevelSelector from './LevelSelector';
 import { DECKS } from './cards';
 
+import { selectionList } from './style/SettingsPane.scss';
+
 export default class DeckList extends React.Component {
   state = {
     checked: new Set(),
@@ -82,7 +84,7 @@ export default class DeckList extends React.Component {
       </li>
     ));
     return (
-      <ul className="selectionlist">
+      <ul className={selectionList}>
         <li>
           <LevelSelector
             inline

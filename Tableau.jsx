@@ -6,6 +6,8 @@ import AbilityDeck from './AbilityDeck';
 import DeckState from './DeckState';
 import { DECK_DEFINITONS } from './cards';
 
+import { currentDeck } from './style/Tableau.scss';
+
 const DEFINITIONS_BY_CLASS = {};
 for (const definition of DECK_DEFINITONS) {
   DEFINITIONS_BY_CLASS[definition.class] = definition;
@@ -13,7 +15,7 @@ for (const definition of DECK_DEFINITONS) {
 
 function VisibilityMenu(props) {
   return ReactDOM.createPortal(props.deckSpecs.map(spec => (
-    <li className="currentdeck" key={spec.id}>
+    <li className={currentDeck} key={spec.id}>
       <a
         href={`#switch-${spec.id}`}
         onClick={() => props.onToggleVisibility(spec.id)}

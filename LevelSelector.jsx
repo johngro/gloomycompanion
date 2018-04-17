@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import { selectionList } from './style/SettingsPane.scss';
+
 const MAX_LEVEL = 7;
 
 export default function LevelSelector(props) {
@@ -12,7 +14,7 @@ export default function LevelSelector(props) {
     props.onChange((value > MAX_LEVEL) ? MAX_LEVEL : value);
   };
   return (
-    <Wrapper className="selectionlist">
+    <Wrapper className={selectionList}>
       <Label>{props.text}</Label>
       <input
         max={MAX_LEVEL.toString()}
