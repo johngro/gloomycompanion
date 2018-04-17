@@ -1,7 +1,11 @@
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
+const mode = process.env.NODE_ENV || 'development';
+const styleLoader = process.env.WEBPACK_SERVE ? 'style-loader' : MiniCssExtractPlugin.loader;
+
 module.exports = {
-  mode: process.env.WEBPACK_MODE || 'development',
+  mode,
 
   entry: './logic',
   output: {
@@ -31,12 +35,29 @@ module.exports = {
           },
         },
       },
-      { test: /\.css$/, use: ['style-loader', 'css-loader', 'postcss-loader'] },
-      { test: /\.scss$/, use: ['style-loader', 'css-loader?modules', 'postcss-loader', 'sass-loader'] },
+      { test: /\.css$/, use: [styleLoader, 'css-loader', 'postcss-loader'] },
+      {
+        test: /\.scss$/,
+        use: [
+          styleLoader,
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+              localIdentName: mode === 'production' ? '[hash:base64]' : '[name]__[local]--[hash:base64:5]',
+            },
+          },
+          'postcss-loader',
+          'sass-loader',
+        ],
+      },
       { test: /\.svg$/, use: 'svg-url-loader?limit=8192' },
       { test: /\.(jpg|ttf)$/, use: 'url-loader?limit=8192' },
     ],
   },
+  plugins: [
+    new MiniCssExtractPlugin({ filename: '[name].css' }),
+  ],
   resolve: {
     extensions: ['.js', '.json', '.jsx'],
   },
@@ -51,7 +72,7 @@ module.exports = {
 if (process.env.WEBPACK_SERVE) {
   module.exports.serve = {
     dev: {
-      publicPath: '/dist/',
+      publicPath: module.exports.output.publicPath,
     },
   };
 }
