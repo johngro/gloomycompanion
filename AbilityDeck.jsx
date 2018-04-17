@@ -9,6 +9,8 @@ import { DECKS } from './cards';
 import { attributes_to_lines, immunities_to_lines, notes_to_lines, special_to_lines } from './macros';
 import { MONSTER_STATS } from './monster_stats';
 
+import * as css from './style/Card.scss';
+
 export default function AbilityDeck(props) {
   // FIXME: Reshuffle animation
   // FIXME: Draw animation repeats when unhiding
@@ -88,12 +90,12 @@ export default function AbilityDeck(props) {
   return (
     <div
       id={spec.id}
-      className={props.hidden ? 'hiddendeck' : 'card-container'}
+      className={props.hidden ? css.hiddenDeck : css.cardContainer}
       onClick={props.onClick}
     >
-      {topDraw ? renderCard(topDraw, -7, ['draw'], false) : null}
-      {topDiscard ? renderCard(topDiscard, -3, ['discard', 'pull'], true) : null}
-      {sndDiscard ? renderCard(sndDiscard, -4, ['discard', 'lift'], true) : null}
+      {topDraw ? renderCard(topDraw, -7, [css.draw], false) : null}
+      {topDiscard ? renderCard(topDiscard, -3, [css.discard, css.pull], true) : null}
+      {sndDiscard ? renderCard(sndDiscard, -4, [css.discard, css.lift], true) : null}
     </div>
   );
 }

@@ -4,6 +4,8 @@ import React from 'react';
 import { expand_string } from './macros';
 import { remove_empty_strings } from './util';
 
+import * as css from './style/Card.scss';
+
 function CardLines(props) {
   const children = props.elements.map((e) => {
     if (Array.isArray(e)) {
@@ -53,10 +55,10 @@ export default function AbilityCardFront(props) {
 
   return (
     <React.Fragment>
-      <span className="name">{props.name}-{props.level}</span>
-      <span className="healthNormal">HP {props.health[0]}</span>
-      {props.health[1] > 0 && <span className="healthElite">HP {props.health[1]}</span>}
-      <span className="initiative">{props.initiative}</span>
+      <span className={css.name}>{props.name}-{props.level}</span>
+      <span className={css.healthNormal}>HP {props.health[0]}</span>
+      {props.health[1] > 0 && <span className={css.healthElite}>HP {props.health[1]}</span>}
+      <span className={css.initiative}>{props.initiative}</span>
       {props.shuffle && <img alt="Shuffle requried" src="images/shuffle.svg" />}
       <CardLines elements={listStack[0]} style={listStyle} />
     </React.Fragment>

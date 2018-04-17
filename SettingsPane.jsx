@@ -6,7 +6,7 @@ import ReactDOM from 'react-dom';
 import DeckList from './DeckList';
 import ScenarioList from './ScenarioList';
 
-import * as css from './style.scss';
+import * as css from './style/SettingsPane.scss';
 
 export default class SettingsPane extends React.Component {
   static propTypes = {
@@ -67,7 +67,7 @@ export default class SettingsPane extends React.Component {
 
     return (
       <React.Fragment>
-        <div className={this.state.visible ? css.pane : `${css.pane} ${css.inactive}`}>
+        <div className={classNames(css.pane, { [css.inactive]: !this.state.visible })}>
           <ul className={css.tabContainer}>
             <li
               className={this.tabClass('scenarios')}

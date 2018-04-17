@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -8,6 +9,8 @@ import Card from './Card';
 import ModifierCardFront from './ModifierCardFront';
 import SettingsPane from './SettingsPane';
 import Tableau from './Tableau';
+
+import * as css from './style/Card.scss';
 
 // Import global styles for side effects
 import './cards.css';
@@ -54,9 +57,9 @@ function refresh_ui() {
   const base_font_size = 26.6;
 
   const tableau = document.getElementById('tableau');
-  const cards = tableau.getElementsByClassName('card');
+  const cards = tableau.getElementsByClassName(css.card);
   for (let i = 1; i < cards.length; i += 1) {
-    if (cards[i].className.indexOf('ability') !== -1) {
+    if (cards[i].className.indexOf(css.ability) !== -1) {
       const scale = cards[i].getBoundingClientRect().height / actual_card_height;
       const scaled_font_size = base_font_size * scale;
 
@@ -90,13 +93,13 @@ function shuffle_deck(deck, include_discards) {
   for (let i = 0; i < deck.draw_pile.length; i += 1) {
     const card = deck.draw_pile[i];
 
-    card.ui.removeClass('lift');
-    card.ui.removeClass('pull');
+    card.ui.removeClass(css.lift);
+    card.ui.removeClass(css.pull);
 
     card.ui.flip_up(false);
 
-    card.ui.removeClass('discard');
-    card.ui.addClass('draw');
+    card.ui.removeClass(css.discard);
+    card.ui.addClass(css.draw);
 
     card.ui.set_depth(-i - 6);
   }
@@ -105,13 +108,13 @@ function shuffle_deck(deck, include_discards) {
 function flip_up_top_card(deck) {
   for (let i = 0; i < deck.discard.length; i += 1) {
     const card = deck.discard[i];
-    card.ui.removeClass('lift');
-    card.ui.removeClass('pull');
+    card.ui.removeClass(css.lift);
+    card.ui.removeClass(css.pull);
     card.ui.push_down();
   }
 
   if (deck.discard.length > 0) {
-    deck.discard[0].ui.addClass('lift');
+    deck.discard[0].ui.addClass(css.lift);
   }
 
   const card = deck.draw_pile.shift();
@@ -123,23 +126,23 @@ function send_to_discard(card, pull_animation) {
   card.ui.set_depth(-3);
 
   if (pull_animation) {
-    card.ui.addClass('pull');
+    card.ui.addClass(css.pull);
   }
 
   card.ui.flip_up(true);
 
-  card.ui.removeClass('draw');
-  card.ui.addClass('discard');
+  card.ui.removeClass(css.draw);
+  card.ui.addClass(css.discard);
 }
 
 function prevent_pull_animation(deck) {
   if (deck.discard.length) {
     if (deck.discard[1]) {
-      deck.discard[1].ui.removeClass('lift');
-      deck.discard[0].ui.addClass('lift');
+      deck.discard[1].ui.removeClass(css.lift);
+      deck.discard[0].ui.addClass(css.lift);
     }
 
-    deck.discard[0].ui.removeClass('pull');
+    deck.discard[0].ui.removeClass(css.pull);
   }
 }
 
@@ -203,8 +206,8 @@ function double_draw(deck) {
     advantage_card = deck.discard[0];
     draw_modifier_card(deck);
   }
-  deck.discard[0].ui.addClass('right');
-  advantage_card.ui.addClass('left');
+  deck.discard[0].ui.addClass(css.right);
+  advantage_card.ui.addClass(css.left);
   deck.advantage_to_clean = true;
 }
 
@@ -240,10 +243,10 @@ class ModifierDeck {
     if (this.discard.length > 0) {
       const card = this.discard[this.discard.length - 1];
       card.ui.set_depth(-3);
-      card.ui.addClass('pull');
+      card.ui.addClass(css.pull);
       card.ui.flip_up(true);
-      card.ui.removeClass('draw');
-      card.ui.addClass('discard');
+      card.ui.removeClass(css.draw);
+      card.ui.addClass(css.discard);
     }
     force_repaint_deck(this);
   }
@@ -455,7 +458,7 @@ function add_modifier_deck(container, deck, preserve_discards) {
   }
 
   const modifier_container = document.createElement('div');
-  modifier_container.className = 'card-container';
+  modifier_container.className = css.cardContainer;
   modifier_container.id = 'modifier-container';
 
   const button_div = document.createElement('div');
@@ -484,7 +487,7 @@ function add_modifier_deck(container, deck, preserve_discards) {
   deck_column.className = 'modifier-deck-column-2';
 
   const deck_space = document.createElement('div');
-  deck_space.className = 'card-container modifier';
+  deck_space.className = classNames(css.cardContainer, css.modifier);
 
   const draw_two_button = document.createElement('div');
   draw_two_button.className = 'button draw-two';

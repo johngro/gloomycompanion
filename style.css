@@ -41,11 +41,6 @@ body
     z-index:            2;
 }
 
-.hiddendeck
-{
-    display: none;
-}
-
 ul.currentdeckslist {
     list-style-type: none;
     margin: 0;

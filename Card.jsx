@@ -1,5 +1,8 @@
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
+
+import * as css from './style/Card.scss';
 
 export default class Card extends React.Component {
   static defaultProps = {
@@ -52,26 +55,25 @@ export default class Card extends React.Component {
   }
 
   render() {
-    const backClasses = new Set([...this.state.classes, ...this.props.classes]);
-    backClasses.add('card');
-    backClasses.add(this.props.deckType);
-
-    const frontClasses = new Set(backClasses);
+    const baseClasses = classNames(
+      [...this.state.classes],
+      [...this.props.classes],
+      css.card,
+      css[this.props.deckType],
+    );
     const faceUp = (this.props.faceUp !== null) ? this.props.faceUp : this.state.faceUp;
-    frontClasses.add('front');
-    frontClasses.add(faceUp ? 'up' : 'down');
-    backClasses.add('back');
-    backClasses.add(faceUp ? 'down' : 'up');
+    const backClasses = classNames(baseClasses, css.back, faceUp ? css.down : css.up);
+    const frontClasses = classNames(baseClasses, css.front, faceUp ? css.up : css.down);
 
     const zIndex = (this.props.zIndex !== null) ? this.props.zIndex : this.state.zIndex;
     const style = { zIndex };
 
     return (
       <React.Fragment>
-        <div className={[...backClasses].join(' ')} style={style}>
+        <div className={backClasses} style={style}>
           {this.props.renderBack()}
         </div>
-        <div className={[...frontClasses].join(' ')} style={style}>
+        <div className={frontClasses} style={style}>
           {this.props.renderFront()}
         </div>
       </React.Fragment>
