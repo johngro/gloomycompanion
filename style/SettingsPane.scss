@@ -1,72 +1,80 @@
 .pane {
-  position: relative;
-  left: 0;
+  $background-color: #fff;
+  $shadow-color: rgba(0, 0, 0, .5);
+
+  background: $background-color;
+  box-shadow: 1em 0 1em $shadow-color;
   height: 100vh;
+  left: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  background: white;
-  box-shadow: 1em 0 1em rgba(0, 0, 0, 0.5);
-  transition: left 0.2s ease;
+  position: relative;
+  transition: left .2s ease;
   z-index: 1;
 
   &.inactive {
-    left: -110%; /* fallback */
+    left: -110%;
     left: calc(-100% - 2em);
   }
 }
 
-.tabBody {
-  padding: 1em;
+.tab-body {
   margin-bottom: 4em;
+  padding: 1em;
 
   &.inactive {
     height: 0;
-    margin-top: 0;
     margin-bottom: 0;
-    padding-top: 0;
-    padding-bottom: 0;
+    margin-top: 0;
     overflow: hidden;
+    padding-bottom: 0;
+    padding-top: 0;
   }
 }
 
-ul.tabContainer {
+.tab-container {
+  $tab-border-color: #000;
+  $tab-inactive-color: #ccc;
+
   display: flex;
+  list-style: none;
   margin: 0;
   padding: 0;
-  list-style: none;
 
   li {
-    flex: 1 1 0;
-    text-align: center;
-    padding: 1em;
     cursor: pointer;
+    flex: 1 1 0;
+    padding: 1em;
+    text-align: center;
 
     &:not(:first-child) {
-      border-left: 1px solid black;
+      border-left: 1px solid $tab-border-color;
     }
   }
 
   .inactive {
-    background-color: #ccc;
+    background-color: $tab-inactive-color;
   }
 }
 
-#cancelArea {
-  position: absolute;
+#cancel-area {
+  $cancel-area-color: rgba(0, 0, 0, .5);
+
+  background-color: $cancel-area-color;
+  height: 100vh;
   left: 0;
+  position: absolute;
   top: 0;
   width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
   z-index: 0;
 }
 
-#settingsButton {
+#settings-button {
+  cursor: pointer;
   float: left;
+  height: 5ch;
   margin-left: 1em;
   margin-top: 1em;
   width: 5ch;
-  height: 5ch;
-  cursor: pointer;
   z-index: 1;
 }

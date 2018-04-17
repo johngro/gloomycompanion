@@ -1,262 +1,348 @@
-.hiddenDeck {
+$card-width: 437px;
+$card-ratio: $card-width / 296px;
+
+.hidden-deck {
   display: none;
 }
 
 @media only screen and (min-height: 500px) and (orientation: portrait) {
-  .cardContainer {
-    max-width: 49.2vh !important;  /* 33vh * (card aspect ratio == 1.476) */
+  .card-container {
+    max-width: 33vh * $card-ratio;
   }
 }
 
-.cardContainer {
-  position: relative;
-  text-align: center;
-
-  box-flex: 1.0;
-
-  width: 453px;
-  width: calc(437px + 1rem); /* 437px == card image width */
-  max-width: 147.6vh;
+.card-container {
   margin: 8px;
 
+  max-width: 100vh * $card-ratio;
+
+  position: relative;
+  text-align: center;
+  width: $card-width + 16px;
+  width: calc($card-width + 1rem);
+
   &.modifier {
-    width: 70%;
     float: right;
+    width: 70%;
   }
 
   &::before {
-    content: "";
-    visibility: hidden;
+    content: '';
     display: inline-block;
-    padding-bottom: 67.7%;              /* 100% / (card aspect ratio) */
+    padding-bottom: 100% / $card-ratio;
+    visibility: hidden;
   }
 }
 
-@keyframes pull-front
-{
-    0%                          { z-index: -3; transform: translate(-1rem, -1rem)   rotateY(180deg); }
-    49%                         { z-index: -2; transform: translate(-50%, -20%)     rotateY(90deg); }
-    51%                         { z-index: 0; transform: translate(-50%, -20%)     rotateY(90deg); }
-    100%                        { z-index: 0; transform: translate(0, 0)           rotateY(0deg); }
+@keyframes pull-front {
+  0% {
+    transform: translate(-1rem, -1rem) rotateY(180deg);
+    z-index: -3;
+  }
+
+  49% {
+    transform: translate(-50%, -20%)   rotateY(90deg);
+    z-index: -2;
+  }
+
+  51% {
+    transform: translate(-50%, -20%)   rotateY(90deg);
+    z-index: 0;
+  }
+
+  100% {
+    transform: translate(0, 0)         rotateY(0deg);
+    z-index: 0;
+  }
 }
 
-@keyframes pull-back
-{
-    0%                          { z-index: -3; transform: translate(-1rem, -1rem)   rotateY(0deg); }
-    49%                         { z-index: -2; transform: translate(-50%, -20%)     rotateY(90deg); }
-    51%                         { z-index: 0; transform: translate(-50%, -20%)     rotateY(90deg); }
-    100%                        { z-index: 0; transform: translate(0, 0)           rotateY(180deg); }
+@keyframes pull-back {
+  0% {
+    transform: translate(-1rem, -1rem) rotateY(0deg);
+    z-index: -3;
+  }
+
+  49% {
+    transform: translate(-50%, -20%)   rotateY(90deg);
+    z-index: -2;
+  }
+
+  51% {
+    transform: translate(-50%, -20%)   rotateY(90deg);
+    z-index: 0;
+  }
+
+  100% {
+    transform: translate(0, 0)         rotateY(180deg);
+    z-index: 0;
+  }
 }
 
-@keyframes lift
-{
-    0%                          { z-index: -1; }
-    50%                         { z-index: -1; }
-    100%                        { z-index: -4; }
+@keyframes lift {
+  0% { z-index: -1; }
+  50% { z-index: -1; }
+  100% { z-index: -4; }
 }
 
-@-webkit-keyframes pull-front
-{
-    0%                          { z-index: -3; transform: translate3d(-1rem, -1rem, 1000px) rotateY(180deg); }
-    49%                         { z-index: -2; transform: translate3d(-50%, -20%, 2000px)   rotateY(90deg); }
-    51%                         { z-index: 0; transform: translate3d(-50%, -20%, 4000px)   rotateY(90deg); }
-    100%                        { z-index: 0; transform: translate3d(0, 0, 4000px)         rotateY(0deg); }
+@-webkit-keyframes pull-front {
+  0% {
+    transform: translate3d(-1rem, -1rem, 1000px) rotateY(180deg);
+    z-index: -3;
+  }
+
+  49% {
+    transform: translate3d(-50%, -20%, 2000px)   rotateY(90deg);
+    z-index: -2;
+  }
+
+  51% {
+    transform: translate3d(-50%, -20%, 4000px)   rotateY(90deg);
+    z-index: 0;
+  }
+
+  100% {
+    transform: translate3d(0, 0, 4000px)         rotateY(0deg);
+    z-index: 0;
+  }
 }
 
-@-webkit-keyframes pull-back
-{
-    0%                          { z-index: -3; transform: translate3d(-1rem, -1rem, 1000px) rotateY(0deg); }
-    49%                         { z-index: -2; transform: translate3d(-50%, -20%, 2000px)   rotateY(90deg); }
-    51%                         { z-index: 0; transform: translate3d(-50%, -20%, 4000px)   rotateY(90deg); }
-    100%                        { z-index: 0; transform: translate3d(0, 0, 4000px)         rotateY(180deg); }
+@-webkit-keyframes pull-back {
+  0% {
+    transform: translate3d(-1rem, -1rem, 1000px) rotateY(0deg);
+    z-index: -3;
+  }
+
+  49% {
+    transform: translate3d(-50%, -20%, 2000px)   rotateY(90deg);
+    z-index: -2;
+  }
+
+  51% {
+    transform: translate3d(-50%, -20%, 4000px)   rotateY(90deg);
+    z-index: 0;
+  }
+
+  100% {
+    transform: translate3d(0, 0, 4000px)         rotateY(180deg);
+    z-index: 0;
+  }
 }
 
-@-webkit-keyframes lift
-{
-    0%                          { z-index: -1; transform: translateZ(3000px); }
-    50%                         { z-index: -1; transform: translateZ(3000px); }
-    100%                        { z-index: -4; }
+@-webkit-keyframes lift {
+  0% {
+    transform: translateZ(3000px);
+    z-index: -1;
+  }
+
+  50% {
+    transform: translateZ(3000px);
+    z-index: -1;
+  }
+
+  100% { z-index: -4; }
 }
 
 .card {
-  position: absolute;
+  $font-color: #fff;
+  $font-color-elite: #ffd700;
+  $font-color-shadow: #000;
+  $shadow-color: rgba(0, 0, 0, .1);
+  $transparent-color: rgba(0, 0, 0, 0);
 
   backface-visibility: hidden;
 
-  color: white;
-  font-family: 'PirataOne';
-  font-size: 100%;
-  text-shadow: 1px 2px 3px black;
-
   background-clip: content-box;
+
   background-origin: content-box;
   background-repeat: no-repeat;
   background-size: cover;
-
-  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
   border-radius: 15px;
-  overflow: hidden;
 
-  &.front.pull {
-    animation-name: pull-front;
-    animation-duration: 0.5s;
+  box-shadow: 5px 5px 5px $shadow-color;
+  color: $font-color;
+  font-family: 'PirataOne', serif;
+  font-size: 100%;
+
+  overflow: hidden;
+  position: absolute;
+  text-shadow: 1px 2px 3px $font-color-shadow;
+
+  &.front {
+    &.ability {
+      background-image: url('../images/front.jpg');
+    }
+
+    &.modifier {
+      img {
+        &.cover {
+          height: 100%;
+          left: 0;
+          position: absolute;
+          top: 0;
+          width: 100%;
+        }
+      }
+
+      &.left {
+        img {
+          &.cover {
+            clip-path: inset(0% 24.5% 0% 24.5%);
+            left: -25%;
+          }
+        }
+      }
+
+      &.right {
+        img {
+          &.cover {
+            clip-path: inset(0% 24.5% 0% 24.5%);
+            left: 25%;
+          }
+        }
+      }
+    }
+
+    &.pull {
+      animation-duration: .5s;
+      animation-name: pull-front;
+    }
+
+    .name {
+      font-size: 120%;
+      left: 0;
+
+      line-height: 200%;
+      position: absolute;
+      text-align: center;
+      top: 0;
+      width: 100%;
+    }
   }
 
-  &.back.pull {
-    animation-name: pull-back;
-    animation-duration: 0.5s;
+  &.back {
+    &.ability {
+      background-image: url('../images/back.jpg');
+    }
+
+    &.modifier {
+      background-image: url('../images/attack_mod_back.jpg');
+    }
+
+    &.pull {
+      animation-duration: .5s;
+      animation-name: pull-back;
+    }
+
+    .name {
+      bottom: 14%;
+      font-size: 90%;
+
+      left: 0;
+      position: absolute;
+      text-align: center;
+      width: 100%;
+    }
   }
 
   &.lift {
+    animation-duration: .5s;
     animation-name: lift;
-    animation-duration: 0.5s;
     animation-timing-function: step-start;
   }
 
   &.discard {
-    top: 1rem;
-    left: 1rem;
     bottom: 0;
+    left: 1rem;
     right: 0;
+    top: 1rem;
   }
 
   &.draw {
-    top: 0;
-    left: 0;
     bottom: 1rem;
-    right: 1rem;
-
-    transition: top 0.4s, left 0.4s, bottom 0.4s, right 0.4s, transform 0.4s, z-index 0s 0.4s;
-  }
-
-  &.ability.front {
-    background-image: url(../images/front.jpg);
-  }
-
-  &.ability.back {
-    background-image: url(../images/back.jpg);
-  }
-
-  &.modifier.back {
-    background-image: url(../images/attack_mod_back.jpg);
-  }
-
-  &.modifier.front img.cover {
-    position: absolute;
-    top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-  }
+    right: 1rem;
+    top: 0;
 
-  &.modifier.front.left img.cover {
-    left: -25%;
-    clip-path: inset(0% 24.5% 0% 24.5%);
-  }
-
-  &.modifier.front.right img.cover {
-    left: 25%;
-    clip-path: inset(0% 24.5% 0% 24.5%);
+    transition: top .4s, left .4s, bottom .4s, right .4s, transform .4s, z-index 0s .4s;
   }
 
   ul {
-    padding: 0;
-    margin: 0;
-
-    list-style: none;
-    text-align: center;
-
     font-family: 'Nyala', 'Sakkal Majalla', 'Philosopher', sans-serif;
+    list-style: none;
+
+    margin: 0;
+    padding: 0;
+
+    text-align: center;
   }
 
   > ul {
-    position: relative;
-    height: 100%;
-    margin: 0 2ch;
-    padding-top: 2.5em;
     box-sizing: border-box;
-    overflow: hidden;
-
     display: flex;
     flex-direction: column;
+    height: 100%;
     justify-content: center;
+    margin: 0 2ch;
+
+    overflow: hidden;
+    padding-top: 2.5em;
+    position: relative;
   }
 
   li {
-    margin: 0.25em 0;
+    margin: .25em 0;
     margin-left: 17%;
-  }
 
-  li li {
-    font-size: 75%;
-    margin: 0;
+    li {
+      font-size: 75%;
+      margin: 0;
+    }
   }
 
   .initiative {
     font-size: 180%;
-    text-align: center;
+    left: 0;
 
     position: absolute;
-    left: 0;
+    text-align: center;
     top: 18%;
     width: 19%;
   }
 
-  .healthNormal {
+  .health-normal {
     font-size: 130%;
-    text-align: left;
+    left: 3%;
 
     position: absolute;
-    left: 3%;
+    text-align: left;
     top: 45%;
     width: 15%;
   }
 
-  .healthElite {
-    color: gold;
+  .health-elite {
+    color: $font-color-elite;
     font-size: 130%;
-    text-align: left;
+    left: 3%;
 
     position: absolute;
-    left: 3%;
+    text-align: left;
     top: 70%;
     width: 15%;
   }
 
-  &.front .name {
-    font-size: 120%;
-    text-align: center;
-
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    line-height: 200%;
-  }
-
-  &.back .name {
-    text-align: center;
-    font-size: 90%;
-
-    position: absolute;
-    left: 0;
-    bottom: 14%;
-    width: 100%;
-  }
-
   .number {
+    bottom: 5%;
     font-family: initial;
     font-size: 30%;
-    text-shadow: none;
 
-    position: absolute;
     left: 3%;
-    bottom: 5%;
+    position: absolute;
+    text-shadow: none;
   }
 
   &::selection {
-    color: rgba(0, 0, 0, 0);
-    background: rgba(0, 0, 0, 0);
+    background: $transparent-color;
+    color: $transparent-color;
   }
 }
 

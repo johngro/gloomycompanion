@@ -43,6 +43,7 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
+              camelCase: 'dashesOnly',
               modules: true,
               localIdentName: mode === 'production' ? '[hash:base64]' : '[name]__[local]--[hash:base64:5]',
             },

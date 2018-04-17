@@ -9,6 +9,7 @@
     "build:dev": "webpack -d",
     "build:prod": "NODE_ENV=production webpack -p",
     "lint": "eslint --ext js,jsx .",
+    "lintsass": "sass-lint -v style/*.scss",
     "serve": "WEBPACK_SERVE=1 webpack-serve"
   },
   "devDependencies": {
@@ -30,6 +31,7 @@
     "mini-css-extract-plugin": "^0.4.0",
     "node-sass": "^4.8.3",
     "postcss-loader": "^2.1.4",
+    "sass-lint": "^1.12.1",
     "sass-loader": "^7.0.1",
     "style-loader": "^0.20.3",
     "svg-url-loader": "^2.3.2",
