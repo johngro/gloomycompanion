@@ -41,6 +41,7 @@ export default class ModifierDeckState {
       draw_pile.push(card);
     });
 
+    shuffle_list(draw_pile);
     return new ModifierDeckState(draw_pile, discard, num_special, needs_shuffled, advantage_card);
   }
 
