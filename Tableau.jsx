@@ -74,31 +74,31 @@ export default class Tableau extends React.Component {
     }));
   }
 
-  handleModDeckDraw() {
+  handleModDeckDraw = () => {
     this.setState(({ modDeckState }) => ({
       modDeckState: modDeckState.draw_card(),
     }));
   }
 
-  handleModDeckDoubleDraw() {
+  handleModDeckDoubleDraw = () => {
     this.setState(({ modDeckState }) => ({
       modDeckState: modDeckState.draw_two_cards(),
     }));
   }
 
-  handleModDeckEndRound() {
+  handleModDeckEndRound = () => {
     this.setState(({ modDeckState }) => ({
       modDeckState: modDeckState.end_round(),
     }));
   }
 
-  handleModDeckAddSpecial(type) {
+  handleModDeckAddSpecial = (type) => {
     this.setState(({ modDeckState }) => ({
       modDeckState: modDeckState.add_card(type),
     }));
   }
 
-  handleModDeckRemoveSpecial(type) {
+  handleModDeckRemoveSpecial = (type) => {
     this.setState(({ modDeckState }) => ({
       modDeckState: modDeckState.remove_card(type),
     }));
@@ -129,11 +129,11 @@ export default class Tableau extends React.Component {
         />
         <ModifierDeck
           deckState={this.state.modDeckState}
-          onDrawClick={() => this.handleModDeckDraw()}
-          onDoubleDrawClick={() => this.handleModDeckDoubleDraw()}
-          onEndRoundClick={() => this.handleModDeckEndRound()}
-          onAddSpecialClick={type => this.handleModDeckAddSpecial(type)}
-          onRemoveSpecialClick={type => this.handleModDeckRemoveSpecial(type)}
+          onDrawClick={this.handleModDeckDraw}
+          onDoubleDrawClick={this.handleModDeckDoubleDraw}
+          onEndRoundClick={this.handleModDeckEndRound}
+          onAddSpecialClick={this.handleModDeckAddSpecial}
+          onRemoveSpecialClick={this.handleModDeckRemoveSpecial}
         />
         {decks}
       </React.Fragment>
