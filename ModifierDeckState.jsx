@@ -5,8 +5,15 @@ import { shuffle_list } from './util';
 
 import * as css from './style/Card.scss';
 
-function define_modifier_card(card_definition) {
+let bless_curse_id_counter = 0;
+function next_bless_curse_card_id() {
+  bless_curse_id_counter += 1;
+  return 'special'+bless_curse_id_counter;
+}
+
+function define_modifier_card(card_definition, id) {
   const card = {
+    id: id,
     card_image: card_definition.image,
     card_type: card_definition.type,
     shuffle_next_round: card_definition.shuffle,
@@ -37,7 +44,7 @@ export default class ModifierDeckState {
     let advantage_card = null;
 
     MODIFIER_DECK.forEach((card_definition) => {
-      const card = define_modifier_card(card_definition);
+      const card = define_modifier_card(card_definition, 'mod'+draw_pile.length);
       draw_pile.push(card);
     });
 
@@ -136,7 +143,9 @@ export default class ModifierDeckState {
     const newDraw = [...this.draw_pile];
     const numSpecial = {...this.num_special};
     // TODO: Brittle
-    newDraw.push(define_modifier_card(MODIFIER_CARDS[card_type.toUpperCase()]));
+    newDraw.push(define_modifier_card(
+          MODIFIER_CARDS[card_type.toUpperCase()],
+          next_bless_curse_card_id()));
     shuffle_list(newDraw);
     numSpecial[card_type] += 1;
     return new ModifierDeckState(newDraw, this.discard, numSpecial, this.needs_shuffled, this.advantage_card);

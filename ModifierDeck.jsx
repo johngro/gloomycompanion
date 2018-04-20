@@ -10,11 +10,10 @@ import ModifierDeckState from './ModifierDeckState';
 import * as css from './style/Card.scss';
 
 export default function ModifierDeck(props) {
-  const { spec } = props;
-
   const renderCard = (card, zIndex, cardClasses, faceUp) => {
     return (
       <Card
+        key={card.id}
         classes={cardClasses}
         deckType='modifier'
         faceUp={faceUp}
