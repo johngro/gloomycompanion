@@ -36,12 +36,6 @@ export default class SettingsPane extends React.Component {
     this.props.onSelectDecks(selectedDecks, this.state.showModifierDeck, true);
   }
 
-  handleApplyLoad = () => {
-    const selectedDecks = this.props.loadFromStorage();
-    this.deckList.current.set_selection(selectedDecks);
-    this.props.onSelectDecks(selectedDecks, this.state.showModifierDeck, true);
-  }
-
   handleApplyScenario = () => {
     const selectedDecks = this.scenarioList.current.get_scenario_decks();
     this.deckList.current.set_selection(selectedDecks);
@@ -90,7 +84,6 @@ export default class SettingsPane extends React.Component {
             <br />
             <input type="button" value="Apply" onClick={this.handleApplyScenario} />
             <br />
-            <input type="button" value="Load Previous Scenario" onClick={this.handleApplyLoad} />
           </div>
           <div className={this.pageClass('decks')}>
             <DeckList ref={this.deckList} />

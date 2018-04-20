@@ -7,6 +7,7 @@ import DeckState from './DeckState';
 import ModifierDeck from './ModifierDeck';
 import ModifierDeckState from './ModifierDeckState';
 import { DECK_DEFINITONS } from './cards';
+import firebase from './firebase.jsx';
 
 import { currentDeck } from './style/Tableau.scss';
 
@@ -50,11 +51,18 @@ export default class Tableau extends React.Component {
         }
       }
     }
-    return { deckHidden, deckState };
+    if (nextProps.useFirebase) {
+      firebase.database().ref('deck_hidden').set(deckHidden);
+      firebase.database().ref('deck_state').set(deckState);
+      return { };
+    } else {
+      return { deckState, deckHidden };
+    }
   }
 
   static propTypes = {
     deckSpecs: PropTypes.arrayOf(PropTypes.object).isRequired,
+    useFirebase: PropTypes.bool.isRequired,
   }
 
   state = {
@@ -63,63 +71,129 @@ export default class Tableau extends React.Component {
     modDeckState: ModifierDeckState.create(),
   }
 
-  handleDeckClick(deckClass) {
+  onModifierChange(snapshot) {
+    this.setState(({ modDeckState }) => ({
+      modDeckState: ModifierDeckState.create(snapshot.val()),
+    }));
+  }
+
+  onDeckStateChange(snapshot) {
+    const newDeckState = {};
+    const upstream = snapshot.val();
+    for (const spec in upstream) {
+      newDeckState[spec] = DeckState.create(DEFINITIONS_BY_CLASS[spec], upstream[spec].name, upstream[spec]);
+    }
     this.setState(({ deckState }) => ({
-      deckState: {
+      deckState: newDeckState,
+    }));
+  }
+
+  onDeckHiddenChange(snapshot) {
+    this.setState(({ deckHidden }) => ({
+      deckHidden: snapshot.val() || {},
+    }));
+  }
+
+  componentDidMount() {
+    if (this.props.useFirebase) {
+      this.modifierRef = firebase.database().ref('modifier');
+      this.modifierRef.on('value', this.onModifierChange, this);
+      this.deckHiddenRef = firebase.database().ref('deck_hidden');
+      this.deckHiddenRef.on('value', this.onDeckHiddenChange, this);
+      this.deckStateRef = firebase.database().ref('deck_state');
+      this.deckStateRef.on('value', this.onDeckStateChange, this);
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.props.useFirebase) {
+      this.modifierRef.off('value', this.onModifierChange, this);
+      this.deckHiddenRef.off('value', this.onDeckHiddenChange, this);
+      this.deckStateRef.off('value', this.onDeckStateChange, this);
+    }
+  }
+
+  handleDeckClick(deckClass) {
+    const mutation = (deckState) => ({
         ...deckState,
         [deckClass]: deckState[deckClass].mustReshuffle() ?
           deckState[deckClass].reshuffle() :
-          deckState[deckClass].draw_card(),
-      },
-    }));
+            deckState[deckClass].draw_card(),
+    });
+    if (this.props.useFirebase) {
+      const deckState = mutation(this.state.deckState);
+      this.deckStateRef.set(deckState);
+    } else {
+      this.setState(({ deckState }) => ({
+        deckState: mutation(deckState)
+      }));
+    }
+  }
+
+  mutateModDeck(mutation) {
+    if (this.props.useFirebase) {
+      const modDeckState = mutation(this.state.modDeckState);
+      this.modifierRef.set(modDeckState.toJSON());
+    } else {
+      this.setState(({ modDeckState }) => ({
+        modDeckState: mutation(modDeckState)
+      }));
+    }
   }
 
   handleModDeckDraw() {
-    this.setState(({ modDeckState }) => ({
-      modDeckState: modDeckState.draw_card()
-    }));
+    const mutation = (deckState) => deckState.draw_card();
+    this.mutateModDeck(mutation);
   }
 
   handleModDeckDoubleDraw() {
-    this.setState(({ modDeckState }) => ({
-      modDeckState: modDeckState.draw_two_cards()
-    }));
+    const mutation = (deckState) => deckState.draw_two_cards();
+    this.mutateModDeck(mutation);
   }
 
   handleModDeckEndRound() {
-    this.setState(({ modDeckState }) => ({
-      modDeckState: modDeckState.end_round()
-    }));
+    const mutation = (deckState) => deckState.end_round();
+    this.mutateModDeck(mutation);
   }
 
   handleModDeckAddSpecial(type) {
-    this.setState(({ modDeckState }) => ({
-      modDeckState: modDeckState.add_card(type)
-    }));
+    const mutation = (deckState) => deckState.add_card(type);
+    this.mutateModDeck(mutation);
   }
 
   handleModDeckRemoveSpecial(type) {
-    this.setState(({ modDeckState }) => ({
-      modDeckState: modDeckState.remove_card(type)
-    }));
+    const mutation = (deckState) => deckState.remove_card(type);
+    this.mutateModDeck(mutation);
   }
 
   handleToggleVisibility = (deckId) => {
-    this.setState(({ deckHidden }) => ({
-      deckHidden: { ...deckHidden, [deckId]: !deckHidden[deckId] },
-    }));
+    const mutation = (deckHidden) => ({ ...deckHidden, [deckId]: !deckHidden[deckId] });
+    if (this.props.useFirebase) {
+      const deckHidden = mutation(this.state.deckHidden);
+      firebase.database().ref('deck_hidden').set(deckHidden);
+    } else {
+      this.setState(({ deckHidden }) => ({
+        deckHidden: mutation(deckHidden),
+      }));
+    }
   }
 
   render() {
-    const decks = this.props.deckSpecs.map(spec => (
-      <AbilityDeck
-        key={spec.id}
-        spec={spec}
-        deckState={this.state.deckState[spec.class]}
-        onClick={() => this.handleDeckClick(spec.class)}
-        hidden={this.state.deckHidden[spec.id]}
-      />
-    ));
+    const decks = this.props.deckSpecs.map(spec => {
+      if (!(spec.class in this.state.deckState) ||
+          !(spec.id in this.state.deckHidden)) {
+        return null;
+      }
+      return (
+          <AbilityDeck
+          key={spec.id}
+          spec={spec}
+          deckState={this.state.deckState[spec.class]}
+          onClick={() => this.handleDeckClick(spec.class)}
+          hidden={this.state.deckHidden[spec.id]}
+          />
+      );
+    });
     return (
       <React.Fragment>
         <VisibilityMenu
