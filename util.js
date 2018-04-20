@@ -8,12 +8,6 @@ export function shuffle_list(l) {
   }
 }
 
-export function remove_child(myNode) {
-  while (myNode.firstChild) {
-    myNode.removeChild(myNode.firstChild);
-  }
-}
-
 export function remove_empty_strings(array) {
   return array.filter(Boolean);
 }

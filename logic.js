@@ -27,18 +27,6 @@ const DECK_TYPES =
       BOSS: 'boss',
     };
 
-function place_deck(deck, container) {
-  for (let i = 0; i < deck.draw_pile.length; i += 1) {
-    const card = deck.draw_pile[i];
-    container.appendChild(card.domNode);
-  }
-  for (let i = 0; i < deck.discard.length; i += 1) {
-    const card = deck.discard[i];
-    container.appendChild(card.domNode);
-  }
-  deck.deck_space = container;
-}
-
 // This should be dynamic dependant on lines per card
 function refresh_ui() {
   const actual_card_height = 296;
