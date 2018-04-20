@@ -3,6 +3,7 @@ import React from 'react';
 
 import AbilityCardBack from './AbilityCardBack';
 import AbilityCardFront from './AbilityCardFront';
+import ButtonDiv from './ButtonDiv';
 import Card from './Card';
 import DeckState from './DeckState';
 import { DECKS } from './cards';
@@ -88,7 +89,7 @@ export default function AbilityDeck(props) {
   const [topDraw] = props.deckState.draw_pile;
   const [topDiscard, sndDiscard] = props.deckState.discard;
   return (
-    <div
+    <ButtonDiv
       id={spec.id}
       className={props.hidden ? css.hiddenDeck : css.cardContainer}
       onClick={props.onClick}
@@ -96,7 +97,7 @@ export default function AbilityDeck(props) {
       {topDraw ? renderCard(topDraw, -7, [css.draw], false) : null}
       {topDiscard ? renderCard(topDiscard, -3, [css.discard, css.pull], true) : null}
       {sndDiscard ? renderCard(sndDiscard, -4, [css.discard, css.lift], true) : null}
-    </div>
+    </ButtonDiv>
   );
 }
 

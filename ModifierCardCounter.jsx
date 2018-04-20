@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import ButtonDiv from './ButtonDiv';
 import ModifierDeckState from './ModifierDeckState';
 
 export default function ModifierCardCounter(props) {
@@ -11,9 +12,9 @@ export default function ModifierCardCounter(props) {
   return (
     <div className="counter-icon">
       <div className={`background ${props.modifierType}`} />
-      <div className="decrement button" onClick={() => props.removeSpecial(props.modifierType)}>-</div>
+      <ButtonDiv className="decrement button" onClick={() => props.removeSpecial(props.modifierType)}>-</ButtonDiv>
       <div className="icon-text">{count()}</div>
-      <div className="increment button" onClick={() => props.addSpecial(props.modifierType)}>+</div>
+      <ButtonDiv className="increment button" onClick={() => props.addSpecial(props.modifierType)}>+</ButtonDiv>
     </div>
   );
 }
