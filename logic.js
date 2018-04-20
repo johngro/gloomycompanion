@@ -1,13 +1,8 @@
-import classNames from 'classnames';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { MONSTER_STATS } from './monster_stats';
-import { SCENARIO_DEFINITIONS, SPECIAL_RULES } from './scenarios';
-import { concat_arrays, create_input, dict_values, find_in_discard, get_from_storage, input_value, is_checked, remove_child, shuffle_list, write_to_storage } from './util';
+import { get_from_storage, write_to_storage } from './util';
 
-import Card from './Card';
-import ModifierCardFront from './ModifierCardFront';
 import SettingsPane from './SettingsPane';
 import Tableau from './Tableau';
 
@@ -19,13 +14,6 @@ import './style.css';
 
 // TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attribtues are active at the beginning of the turn, and active after initiative)
 const visible_ability_decks = [];
-
-const DECK_TYPES =
-    {
-      MODIFIER: 'modifier',
-      ABILITY: 'ability',
-      BOSS: 'boss',
-    };
 
 // This should be dynamic dependant on lines per card
 function refresh_ui() {

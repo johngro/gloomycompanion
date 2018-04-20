@@ -1,19 +1,15 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import { CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK } from './modifiers';
+import { MODIFIER_CARDS, MODIFIER_DECK } from './modifiers';
 import { shuffle_list } from './util';
-
-import * as css from './style/Card.scss';
 
 let bless_curse_id_counter = 0;
 function next_bless_curse_card_id() {
   bless_curse_id_counter += 1;
-  return 'special'+bless_curse_id_counter;
+  return `special${bless_curse_id_counter}`;
 }
 
 function define_modifier_card(card_definition, id) {
   const card = {
-    id: id,
+    id,
     card_image: card_definition.image,
     card_type: card_definition.type,
     shuffle_next_round: card_definition.shuffle,
@@ -35,16 +31,16 @@ export default class ModifierDeckState {
     this.advantage_card = advantage_card;
   }
 
-  static create(storageState) {
+  static create() {
     // FIXME: Get these from storage
     const draw_pile = [];
     const discard = [];
-    let needs_shuffled = false;
-    let num_special = { 'bless': 0, 'curse': 0 };
-    let advantage_card = null;
+    const needs_shuffled = false;
+    const num_special = { bless: 0, curse: 0 };
+    const advantage_card = null;
 
     MODIFIER_DECK.forEach((card_definition) => {
-      const card = define_modifier_card(card_definition, 'mod'+draw_pile.length);
+      const card = define_modifier_card(card_definition, `mod${draw_pile.length}`);
       draw_pile.push(card);
     });
 
@@ -59,21 +55,22 @@ export default class ModifierDeckState {
   draw_card() {
     if (this.mustReshuffle()) {
       return this.reshuffle();
-    } else {
-      const drewCard = this.draw_pile[0];
-      const num_special = {...this.num_special};
-      const discard = [...this.discard];
-      if (drewCard.card_type == 'bless' || drewCard.card_type == 'curse') {
-        // Remove bless and curses as we draw them
-        num_special[drewCard.card_type] -= 1;
-      }
-
-      discard.unshift(drewCard);
-
-      let needs_shuffled = this.needs_shuffled || drewCard.shuffle_next_round;
-      return new ModifierDeckState(this.draw_pile.slice(1), discard,
-          num_special, needs_shuffled);
     }
+    const drewCard = this.draw_pile[0];
+    const num_special = { ...this.num_special };
+    const discard = [...this.discard];
+    if (drewCard.card_type == 'bless' || drewCard.card_type == 'curse') {
+      // Remove bless and curses as we draw them
+      num_special[drewCard.card_type] -= 1;
+    }
+
+    discard.unshift(drewCard);
+
+    const needs_shuffled = this.needs_shuffled || drewCard.shuffle_next_round;
+    return new ModifierDeckState(
+      this.draw_pile.slice(1), discard,
+      num_special, needs_shuffled,
+    );
   }
 
   draw_two_cards() {
@@ -93,7 +90,7 @@ export default class ModifierDeckState {
       advantage_card = deck.discard.shift();
       deck = deck.reshuffle();
       // Put advantage card back in the discard
-      deck.discard.unshift(advantage_card)
+      deck.discard.unshift(advantage_card);
       deck = deck.draw_card();
     } else {
       deck = deck.draw_card();
@@ -101,15 +98,17 @@ export default class ModifierDeckState {
       deck = deck.draw_card();
     }
 
-    return new ModifierDeckState(deck.draw_pile, deck.discard, deck.num_special,
-        deck.needs_shuffled, advantage_card);
+    return new ModifierDeckState(
+      deck.draw_pile, deck.discard, deck.num_special,
+      deck.needs_shuffled, advantage_card,
+    );
   }
 
   reshuffle() {
     const newDraw = [...this.draw_pile];
     // Add non-bless/curse cards back into the draw deck
     for (let i = 0; i < this.discard.length; i += 1) {
-      if (this.discard[i].card_type != 'bless' && this.discard[i].card_type != 'curse' ) {
+      if (this.discard[i].card_type != 'bless' && this.discard[i].card_type != 'curse') {
         newDraw.push(this.discard[i]);
       }
     }
@@ -122,9 +121,8 @@ export default class ModifierDeckState {
   remove_card(card_type) {
     for (let i = 0; i < this.draw_pile.length; i += 1) {
       if (this.draw_pile[i].card_type == card_type) {
-
         const newDraw = [...this.draw_pile];
-        const numSpecial = {...this.num_special};
+        const numSpecial = { ...this.num_special };
         newDraw.splice(i, 1);
         shuffle_list(newDraw);
         numSpecial[card_type] -= 1;
@@ -141,11 +139,12 @@ export default class ModifierDeckState {
     }
 
     const newDraw = [...this.draw_pile];
-    const numSpecial = {...this.num_special};
+    const numSpecial = { ...this.num_special };
     // TODO: Brittle
     newDraw.push(define_modifier_card(
-          MODIFIER_CARDS[card_type.toUpperCase()],
-          next_bless_curse_card_id()));
+      MODIFIER_CARDS[card_type.toUpperCase()],
+      next_bless_curse_card_id(),
+    ));
     shuffle_list(newDraw);
     numSpecial[card_type] += 1;
     return new ModifierDeckState(newDraw, this.discard, numSpecial, this.needs_shuffled, this.advantage_card);
