@@ -8,23 +8,24 @@ export default class DeckState {
   }
 
   static create(definition, name, storageState) {
-    const draw_pile = [];
-    const discard = [];
+    let draw_pile = [];
+    let discard = [];
 
-    for (const [i, cardDef] of definition.cards.entries()) {
-      const [shuffle, initiative, ...lines] = cardDef;
-      const card = {
-        id: `${name}_${i}`,
-        shuffle_next: shuffle,
-        initiative,
-        starting_lines: lines,
-      };
+    if (storageState == null) {
+      for (const [i, cardDef] of definition.cards.entries()) {
+        const [shuffle, initiative, ...lines] = cardDef;
+        const card = {
+          id: `${name}_${i}`,
+          shuffle_next: shuffle,
+          initiative,
+          starting_lines: lines,
+        };
 
-      if (storageState && find_in_discard(storageState.discard, card.id)) {
-        discard.push(card);
-      } else {
         draw_pile.push(card);
       }
+    } else {
+      draw_pile = storageState.draw_pile || [];
+      discard = storageState.discard || [];
     }
 
     return new DeckState(draw_pile, discard, name);

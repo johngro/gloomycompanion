@@ -1,4 +1,4 @@
-import { MODIFIER_CARDS, MODIFIER_DECK } from './modifiers';
+import { CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK } from './modifiers';
 import { shuffle_list } from './util';
 
 let bless_curse_id_counter = 0;
@@ -13,10 +13,6 @@ function define_modifier_card(card_definition, id) {
     card_image: card_definition.image,
     card_type: card_definition.type,
     shuffle_next_round: card_definition.shuffle,
-    toJSON: () => ({
-      card_type: card.card_type,
-      shuffle_next_round: card.shuffle_next_round,
-    }),
   };
 
   return card;
@@ -31,21 +27,46 @@ export default class ModifierDeckState {
     this.advantage_card = advantage_card;
   }
 
-  static create() {
-    // FIXME: Get these from storage
-    const draw_pile = [];
-    const discard = [];
-    const needs_shuffled = false;
-    const num_special = { bless: 0, curse: 0 };
-    const advantage_card = null;
+  static create(storageState) {
+    let draw_pile = [];
+    let discard = [];
+    let needs_shuffled = false;
+    let num_special = { bless: 0, curse: 0 };
+    let advantage_card = null;
 
-    MODIFIER_DECK.forEach((card_definition) => {
-      const card = define_modifier_card(card_definition, `mod${draw_pile.length}`);
-      draw_pile.push(card);
-    });
+    if (storageState != null) {
+      if (storageState.draw_pile) {
+        draw_pile = [...storageState.draw_pile];
+      }
+      if (storageState.discard) {
+        discard = [...storageState.discard];
+      }
+      needs_shuffled = storageState.needs_shuffled;
+      num_special = storageState.num_special;
+      advantage_card = storageState.advantage_card;
+    } else {
+      MODIFIER_DECK.forEach((card_definition) => {
+        const card = define_modifier_card(card_definition, 'mod'+draw_pile.length);
+        draw_pile.push(card);
+      });
+      shuffle_list(draw_pile);
+    }
 
-    shuffle_list(draw_pile);
     return new ModifierDeckState(draw_pile, discard, num_special, needs_shuffled, advantage_card);
+  }
+
+  toJSON() {
+    const json = {
+      draw_pile: this.draw_pile,
+      discard: this.discard,
+      num_special: this.num_special,
+      needs_shuffled: this.needs_shuffled,
+    };
+    // Firebase does not like returning null in an entry, so don't include advantage_card unless it's there.
+    if (this.advantage_card) {
+      json.advantage_card = this.advantage_card;
+    }
+    return json;
   }
 
   mustReshuffle() {

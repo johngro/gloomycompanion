@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 
 import { get_from_storage, write_to_storage } from './util';
 
+import firebase from './firebase.jsx';
+import { useFirebase } from './firebase.jsx';
 import SettingsPane from './SettingsPane';
 import Tableau from './Tableau';
 
@@ -37,38 +39,70 @@ function refresh_ui() {
 function render_tableau(selected_deck_names, preserve) {
   const tableauContainer = document.getElementById('tableau');
 
+  const renderTableau = () => {
+    // Render tableau (or update props)
+    const deckSpecs = selected_deck_names.map(d => ({
+      id: (d.name || d.class).replace(/\s+/g, ''),
+      name: d.name || d.class,
+      class: d.class,
+      level: d.level,
+    }));
+    ReactDOM.render(
+      React.createElement(Tableau, { deckSpecs, useFirebase }),
+      tableauContainer,
+    );
+
+    // Rescale card text if necessary
+    refresh_ui();
+  };
+
   // If not preserving state, totally nuke the old tableau
   if (!preserve) {
     ReactDOM.unmountComponentAtNode(tableauContainer);
+    if (useFirebase) {
+      return firebase.database().ref().remove(renderTableau);
+    } else {
+      return Promise.resolve(renderTableau());
+    }
   }
 
-  // Render tableau (or update props)
-  const deckSpecs = selected_deck_names.map(d => ({
-    id: (d.name || d.class).replace(/\s+/g, ''),
-    name: d.name || d.class,
-    class: d.class,
-    level: d.level,
-  }));
-  ReactDOM.render(
-    React.createElement(Tableau, { deckSpecs }),
-    tableauContainer,
-  );
-
-  // Rescale card text if necessary
-  refresh_ui();
+  return Promise.resolve(renderTableau());
 }
 
 export function init() {
+  const doRender = (selected_deck_names, showModifierDeck, preserve) => {
+    render_tableau(selected_deck_names, preserve).then(() => {
+      const modifier_deck_section = document.getElementById('modifier-container');
+      modifier_deck_section.style.display = showModifierDeck ? 'block' : 'none';
+    });
+  };
+
+  let selectedDecksRef;
+  if (useFirebase) {
+    selectedDecksRef = firebase.database().ref('selected_decks');
+    selectedDecksRef.on('value', (snapshot) => {
+      // Always preserve, because we handle nuking the old state in onSelectDecks
+      const preserve = true;
+      // TODO: fix showModifierDeck
+      doRender(snapshot.val() || [], true, preserve);
+    });
+  }
+
   ReactDOM.render(
     React.createElement(SettingsPane, {
       onSelectDecks: (selected_deck_names, showModifierDeck, preserve) => {
         console.log(`oSD(..., ${showModifierDeck}, ${preserve})`);
-        localStorage.clear();
-        write_to_storage('selected_deck_names', JSON.stringify(selected_deck_names));
-        render_tableau(selected_deck_names, preserve);
-        const modifier_deck_section = document.getElementById('modifier-container');
-        modifier_deck_section.style.display = showModifierDeck ? 'block' : 'none';
+        if (useFirebase) {
+          let future = Promise.resolve(null);
+          if (!preserve) {
+            future = firebase.database().ref().remove();
+          }
+          future.then(() => selectedDecksRef.set(selected_deck_names));
+        } else {
+          doRender(selected_deck_names, showModifierDeck, preserve);
+        }
       },
+      // TODO: get rid of this
       loadFromStorage: () => JSON.parse(get_from_storage('selected_deck_names')),
     }),
     document.getElementById('panecontainer'),
