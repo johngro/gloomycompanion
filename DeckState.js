@@ -1,4 +1,4 @@
-import { find_in_discard, shuffle_list } from './util';
+import { shuffle_list } from './util';
 
 export default class DeckState {
   constructor(draw_pile, discard, name) {

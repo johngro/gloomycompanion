@@ -1,4 +1,4 @@
-import { CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK } from './modifiers';
+import { MODIFIER_CARDS, MODIFIER_DECK } from './modifiers';
 import { shuffle_list } from './util';
 
 let bless_curse_id_counter = 0;
@@ -46,7 +46,7 @@ export default class ModifierDeckState {
       advantage_card = storageState.advantage_card;
     } else {
       MODIFIER_DECK.forEach((card_definition) => {
-        const card = define_modifier_card(card_definition, 'mod'+draw_pile.length);
+        const card = define_modifier_card(card_definition, `mod${draw_pile.length}`);
         draw_pile.push(card);
       });
       shuffle_list(draw_pile);

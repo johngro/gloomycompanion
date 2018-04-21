@@ -1,12 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { get_from_storage, write_to_storage } from './util';
-
-import firebase from './firebase.jsx';
-import { useFirebase } from './firebase.jsx';
 import SettingsPane from './SettingsPane';
 import Tableau from './Tableau';
+import firebase, { useFirebase } from './firebase';
 
 import * as css from './style/Card.scss';
 
@@ -61,9 +58,8 @@ function render_tableau(selected_deck_names, preserve) {
     ReactDOM.unmountComponentAtNode(tableauContainer);
     if (useFirebase) {
       return firebase.database().ref().remove(renderTableau);
-    } else {
-      return Promise.resolve(renderTableau());
     }
+    return Promise.resolve(renderTableau());
   }
 
   return Promise.resolve(renderTableau());
@@ -102,8 +98,6 @@ export function init() {
           doRender(selected_deck_names, showModifierDeck, preserve);
         }
       },
-      // TODO: get rid of this
-      loadFromStorage: () => JSON.parse(get_from_storage('selected_deck_names')),
     }),
     document.getElementById('panecontainer'),
   );

@@ -12,7 +12,6 @@ import * as css from './style/SettingsPane.scss';
 export default class SettingsPane extends React.Component {
   static propTypes = {
     onSelectDecks: PropTypes.func.isRequired,
-    loadFromStorage: PropTypes.func.isRequired,
   }
 
   state = {

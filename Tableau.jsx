@@ -7,7 +7,7 @@ import DeckState from './DeckState';
 import ModifierDeck from './ModifierDeck';
 import ModifierDeckState from './ModifierDeckState';
 import { DECK_DEFINITONS } from './cards';
-import firebase from './firebase.jsx';
+import firebase from './firebase';
 
 import { currentDeck } from './style/Tableau.scss';
 
@@ -55,9 +55,8 @@ export default class Tableau extends React.Component {
       firebase.database().ref('deck_hidden').set(deckHidden);
       firebase.database().ref('deck_state').set(deckState);
       return { };
-    } else {
-      return { deckState, deckHidden };
     }
+    return { deckState, deckHidden };
   }
 
   static propTypes = {
@@ -69,29 +68,6 @@ export default class Tableau extends React.Component {
     deckHidden: {},
     deckState: {},
     modDeckState: ModifierDeckState.create(),
-  }
-
-  onModifierChange(snapshot) {
-    this.setState(({ modDeckState }) => ({
-      modDeckState: ModifierDeckState.create(snapshot.val()),
-    }));
-  }
-
-  onDeckStateChange(snapshot) {
-    const newDeckState = {};
-    const upstream = snapshot.val();
-    for (const spec in upstream) {
-      newDeckState[spec] = DeckState.create(DEFINITIONS_BY_CLASS[spec], upstream[spec].name, upstream[spec]);
-    }
-    this.setState(({ deckState }) => ({
-      deckState: newDeckState,
-    }));
-  }
-
-  onDeckHiddenChange(snapshot) {
-    this.setState(({ deckHidden }) => ({
-      deckHidden: snapshot.val() || {},
-    }));
   }
 
   componentDidMount() {
@@ -113,19 +89,38 @@ export default class Tableau extends React.Component {
     }
   }
 
+  onModifierChange(snapshot) {
+    this.setState({
+      modDeckState: ModifierDeckState.create(snapshot.val()),
+    });
+  }
+
+  onDeckStateChange(snapshot) {
+    const deckState = {};
+    const upstream = snapshot.val();
+    for (const spec in upstream) {
+      deckState[spec] = DeckState.create(DEFINITIONS_BY_CLASS[spec], upstream[spec].name, upstream[spec]);
+    }
+    this.setState({ deckState });
+  }
+
+  onDeckHiddenChange(snapshot) {
+    this.setState({ deckHidden: snapshot.val() || {} });
+  }
+
   handleDeckClick(deckClass) {
-    const mutation = (deckState) => ({
-        ...deckState,
-        [deckClass]: deckState[deckClass].mustReshuffle() ?
-          deckState[deckClass].reshuffle() :
-            deckState[deckClass].draw_card(),
+    const mutation = deckState => ({
+      ...deckState,
+      [deckClass]: deckState[deckClass].mustReshuffle() ?
+        deckState[deckClass].reshuffle() :
+        deckState[deckClass].draw_card(),
     });
     if (this.props.useFirebase) {
       const deckState = mutation(this.state.deckState);
       this.deckStateRef.set(deckState);
     } else {
       this.setState(({ deckState }) => ({
-        deckState: mutation(deckState)
+        deckState: mutation(deckState),
       }));
     }
   }
@@ -136,38 +131,38 @@ export default class Tableau extends React.Component {
       this.modifierRef.set(modDeckState.toJSON());
     } else {
       this.setState(({ modDeckState }) => ({
-        modDeckState: mutation(modDeckState)
+        modDeckState: mutation(modDeckState),
       }));
     }
   }
 
   handleModDeckDraw = () => {
-    const mutation = (deckState) => deckState.draw_card();
+    const mutation = deckState => deckState.draw_card();
     this.mutateModDeck(mutation);
   }
 
   handleModDeckDoubleDraw = () => {
-    const mutation = (deckState) => deckState.draw_two_cards();
+    const mutation = deckState => deckState.draw_two_cards();
     this.mutateModDeck(mutation);
   }
 
   handleModDeckEndRound = () => {
-    const mutation = (deckState) => deckState.end_round();
+    const mutation = deckState => deckState.end_round();
     this.mutateModDeck(mutation);
   }
 
   handleModDeckAddSpecial = (type) => {
-    const mutation = (deckState) => deckState.add_card(type);
+    const mutation = deckState => deckState.add_card(type);
     this.mutateModDeck(mutation);
   }
 
   handleModDeckRemoveSpecial = (type) => {
-    const mutation = (deckState) => deckState.remove_card(type);
+    const mutation = deckState => deckState.remove_card(type);
     this.mutateModDeck(mutation);
   }
 
   handleToggleVisibility = (deckId) => {
-    const mutation = (deckHidden) => ({ ...deckHidden, [deckId]: !deckHidden[deckId] });
+    const mutation = deckHidden => ({ ...deckHidden, [deckId]: !deckHidden[deckId] });
     if (this.props.useFirebase) {
       const deckHidden = mutation(this.state.deckHidden);
       firebase.database().ref('deck_hidden').set(deckHidden);
@@ -179,19 +174,19 @@ export default class Tableau extends React.Component {
   }
 
   render() {
-    const decks = this.props.deckSpecs.map(spec => {
+    const decks = this.props.deckSpecs.map((spec) => {
       if (!(spec.class in this.state.deckState) ||
           !(spec.id in this.state.deckHidden)) {
         return null;
       }
       return (
-          <AbilityDeck
+        <AbilityDeck
           key={spec.id}
           spec={spec}
           deckState={this.state.deckState[spec.class]}
           onClick={() => this.handleDeckClick(spec.class)}
           hidden={this.state.deckHidden[spec.id]}
-          />
+        />
       );
     });
     return (

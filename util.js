@@ -11,21 +11,3 @@ export function shuffle_list(l) {
 export function remove_empty_strings(array) {
   return array.filter(Boolean);
 }
-
-export function write_to_storage(name, value) {
-  localStorage.setItem(name, value);
-  console.log(`Wrote ${name} to local storage, with value: ${value}`);
-}
-
-export function get_from_storage(name) {
-  return localStorage.getItem(name);
-}
-
-export function find_in_discard(discard, id) {
-  for (let i = 0; i < discard.length; i += 1) {
-    if (discard[i].id === id) {
-      return discard[i];
-    }
-  }
-  return null;
-}
