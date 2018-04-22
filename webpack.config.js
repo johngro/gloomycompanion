@@ -1,3 +1,4 @@
+const fs = require('fs');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
@@ -63,11 +64,25 @@ module.exports = {
     extensions: ['.js', '.json', '.jsx'],
   },
 
-  externals: {
-    'prop-types': 'PropTypes',
-    react: 'React',
-    'react-dom': 'ReactDOM',
-  },
+  externals: [
+    {
+      'firebase/app': 'firebase',
+      'prop-types': 'PropTypes',
+      react: 'React',
+      'react-dom': 'ReactDOM',
+    },
+    (context, request, callback) => {
+      if (request === './config.local') {
+        return fs.exists(path.resolve(__dirname, 'config.local.js'), (exists) => {
+          if (exists) {
+            return callback();
+          }
+          return callback(null, '{}');
+        });
+      }
+      return callback();
+    },
+  ],
 };
 
 if (process.env.WEBPACK_SERVE) {

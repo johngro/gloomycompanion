@@ -1,22 +1,13 @@
 import firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/database';
 
-export const useFirebase = false;
+import config from './config';
+
+export const useFirebase = config.useFirebase;
 
 // Initialize Firebase
-const config = {
-  apiKey: '',
-  authDomain: '',
-  databaseURL: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
-};
-
 function init() {
   if (useFirebase) {
-    return firebase.initializeApp(config);
+    return firebase.initializeApp(config.firebase);
   }
   return null;
 }
