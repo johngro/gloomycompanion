@@ -417,3 +417,18 @@ export const DECK_DEFINITONS =
           ],
   },
 ];
+
+export function makeDeckSpec(deckName, level) {
+  let deckClass;
+  if (deckName in DECKS) {
+    deckClass = DECKS[deckName].class;
+  } else if (deckName.indexOf('Boss') !== -1) {
+    deckClass = DECKS.Boss.class;
+  }
+  return {
+    id: deckName.replace(/\s+/g, ''),
+    name: deckName,
+    class: deckClass,
+    level,
+  };
+}

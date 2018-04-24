@@ -1,7 +1,7 @@
 import React from 'react';
 
 import LevelSelector from './LevelSelector';
-import { DECKS } from './cards';
+import { makeDeckSpec } from './cards';
 import { SCENARIO_DEFINITIONS, SPECIAL_RULES } from './scenarios';
 
 import { selectionList } from './style/SettingsPane.scss';
@@ -9,20 +9,14 @@ import { selectionList } from './style/SettingsPane.scss';
 export default class ScenarioList extends React.Component {
   state = { level: 1, scenario: 0 };
 
-  get_scenario_decks() {
+  getScenarioDecks() {
     const { decks, special_rules: specialRules = [] } = SCENARIO_DEFINITIONS[this.state.scenario];
-    return decks.map((deck) => {
-      if (DECKS[deck.name]) {
-        deck.class = DECKS[deck.name].class;
-      } else if (deck.name.indexOf('Boss') != -1) {
-        deck.class = DECKS.Boss.class;
+    return decks.map(({ name }) => {
+      let level = this.state.level;
+      if ((specialRules.indexOf(SPECIAL_RULES.living_corpse_two_levels_extra) >= 0) && (name == SPECIAL_RULES.living_corpse_two_levels_extra.affected_deck)) {
+        level = Math.min(7, (this.state.level + parseInt(SPECIAL_RULES.living_corpse_two_levels_extra.extra_levels)));
       }
-      if ((specialRules.indexOf(SPECIAL_RULES.living_corpse_two_levels_extra) >= 0) && (deck.name == SPECIAL_RULES.living_corpse_two_levels_extra.affected_deck)) {
-        deck.level = Math.min(7, (this.state.level + parseInt(SPECIAL_RULES.living_corpse_two_levels_extra.extra_levels)));
-      } else {
-        deck.level = this.state.level;
-      }
-      return deck;
+      return makeDeckSpec(name, level);
     });
   }
 

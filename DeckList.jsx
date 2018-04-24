@@ -1,7 +1,7 @@
 import React from 'react';
 
 import LevelSelector from './LevelSelector';
-import { DECKS } from './cards';
+import { DECKS, makeDeckSpec } from './cards';
 
 import { selectionList } from './style/SettingsPane.scss';
 
@@ -15,23 +15,21 @@ export default class DeckList extends React.Component {
     }, {}),
   }
 
-  get_selected_decks() {
+  getSelectedDecks() {
     const result = [];
     for (const name of this.state.checked) {
-      const deck = DECKS[name];
-      deck.level = this.state.levels[name];
-      result.push(deck);
+      result.push(makeDeckSpec(name, this.state.levels[name]));
     }
     return result;
   }
 
-  set_selection(selected_deck_names) {
+  setSelection(deckSpecs) {
     // FIXME: "Boss: " names get filtered out
-    selected_deck_names = selected_deck_names.filter(d => d.name in DECKS);
-    for (const deck_names of selected_deck_names) {
-      this.setDeckLevel(deck_names.name, deck_names.level);
+    deckSpecs = deckSpecs.filter(d => d.name in DECKS);
+    for (const spec of deckSpecs) {
+      this.setDeckLevel(spec.name, spec.level);
     }
-    this.setState({ checked: new Set(selected_deck_names.map(d => d.name)) });
+    this.setState({ checked: new Set(deckSpecs.map(d => d.name)) });
   }
 
   setDeckLevel(deckName, level) {

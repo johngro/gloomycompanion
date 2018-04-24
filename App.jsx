@@ -28,8 +28,8 @@ function refresh_ui() {
 
 class App extends React.Component {
   state = {
+    deckSpecs: [],
     modDeckHidden: true,
-    selectedDeckNames: [],
     settingsVisible: true,
   }
 
@@ -61,25 +61,25 @@ class App extends React.Component {
   }
 
   onSelectedDecksChange(snapshot) {
-    this.setState({ selectedDeckNames: snapshot.val() || [] });
+    this.setState({ deckSpecs: snapshot.val() || [] });
   }
 
   settingsBtnContainer = React.createRef();
   tableau = React.createRef();
 
-  handleSelectDecks = (selectedDeckNames, showModifierDeck, preserve) => {
+  handleSelectDecks = (deckSpecs, showModifierDeck, preserve) => {
     if (useFirebase) {
       let future = Promise.resolve(null);
       if (!preserve) {
         future = firebase.database().ref().remove();
       }
       future
-        .then(() => this.selectedDecksRef.set(selectedDeckNames))
+        .then(() => this.selectedDecksRef.set(deckSpecs))
         .then(() => this.modDeckHiddenRef.set(!showModifierDeck));
     } else {
       this.setState({
+        deckSpecs,
         modDeckHidden: !showModifierDeck,
-        selectedDeckNames,
       });
       if (!preserve) {
         this.tableau.current.reset();
@@ -91,13 +91,6 @@ class App extends React.Component {
   handleSettingsShow = () => this.setState({ settingsVisible: true });
 
   render() {
-    const deckSpecs = this.state.selectedDeckNames.map(d => ({
-      id: (d.name || d.class).replace(/\s+/g, ''),
-      name: d.name || d.class,
-      class: d.class,
-      level: d.level,
-    }));
-
     return (
       <React.StrictMode>
         <SettingsPane
@@ -112,7 +105,7 @@ class App extends React.Component {
           <div id="currentdecks" />
         </div>
         <Tableau
-          deckSpecs={deckSpecs}
+          deckSpecs={this.state.deckSpecs}
           modDeckHidden={this.state.modDeckHidden}
           ref={this.tableau}
           useFirebase={useFirebase}

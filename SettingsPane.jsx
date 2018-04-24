@@ -48,14 +48,14 @@ export default class SettingsPane extends React.Component {
   }
 
   handleApplyDecks = () => {
-    const selectedDecks = this.deckList.current.get_selected_decks();
-    this.props.onSelectDecks(selectedDecks, this.state.showModifierDeck, true);
+    const deckSpecs = this.deckList.current.getSelectedDecks();
+    this.props.onSelectDecks(deckSpecs, this.state.showModifierDeck, true);
   }
 
   handleApplyScenario = () => {
-    const selectedDecks = this.scenarioList.current.get_scenario_decks();
-    this.deckList.current.set_selection(selectedDecks);
-    this.props.onSelectDecks(selectedDecks, this.state.showModifierDeck, false);
+    const deckSpecs = this.scenarioList.current.getScenarioDecks();
+    this.deckList.current.setSelection(deckSpecs);
+    this.props.onSelectDecks(deckSpecs, this.state.showModifierDeck, false);
   }
 
   handleShowModifierChanged = e => this.setState({ showModifierDeck: e.target.checked })
