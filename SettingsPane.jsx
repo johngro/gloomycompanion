@@ -8,22 +8,6 @@ import ScenarioList from './ScenarioList';
 
 import * as css from './style/SettingsPane.scss';
 
-export function SettingsButton(props) {
-  return (
-    <input
-      alt="Configure"
-      id={css.settingsButton}
-      type="image"
-      src="images/settings.svg"
-      onClick={props.onClick}
-    />
-  );
-}
-
-SettingsButton.propTypes = {
-  onClick: PropTypes.func.isRequired,
-};
-
 export default class SettingsPane extends React.Component {
   static propTypes = {
     onHide: PropTypes.func.isRequired,
