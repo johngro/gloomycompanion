@@ -1,7 +1,6 @@
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 import ButtonDiv from './ButtonDiv';
 import DeckList from './DeckList';
@@ -9,13 +8,30 @@ import ScenarioList from './ScenarioList';
 
 import * as css from './style/SettingsPane.scss';
 
+export function SettingsButton(props) {
+  return (
+    <input
+      alt="Configure"
+      id={css.settingsButton}
+      type="image"
+      src="images/settings.svg"
+      onClick={props.onClick}
+    />
+  );
+}
+
+SettingsButton.propTypes = {
+  onClick: PropTypes.func.isRequired,
+};
+
 export default class SettingsPane extends React.Component {
   static propTypes = {
+    onHide: PropTypes.func.isRequired,
     onSelectDecks: PropTypes.func.isRequired,
+    visible: PropTypes.bool.isRequired,
   }
 
   state = {
-    visible: true,
     activeTab: 'scenarios',
     showModifierDeck: true,
   }
@@ -42,23 +58,9 @@ export default class SettingsPane extends React.Component {
     this.props.onSelectDecks(selectedDecks, this.state.showModifierDeck, false);
   }
 
-  handleHideSettings = () => this.setState({ visible: false })
-
-  handleShowSettings = () => this.setState({ visible: true })
-
   handleShowModifierChanged = e => this.setState({ showModifierDeck: e.target.checked })
 
   render() {
-    const settingsBtn = (
-      <input
-        alt="Configure"
-        id={css.settingsButton}
-        type="image"
-        src="images/settings.svg"
-        onClick={this.handleShowSettings}
-      />
-    );
-
     const renderTab = (name, text) => {
       const onClick = () => this.setState({ activeTab: name });
       return (
@@ -74,10 +76,9 @@ export default class SettingsPane extends React.Component {
       );
     };
 
-    const settingsBtnTarget = document.getElementById('settingsbtncontainer');
     return (
-      <React.Fragment>
-        <div className={classNames(css.pane, { [css.inactive]: !this.state.visible })}>
+      <div id="panecontainer" className="panecontainer">
+        <div className={classNames(css.pane, { [css.inactive]: !this.props.visible })}>
           <ul className={css.tabContainer} role="tablist">
             {renderTab('scenarios', 'Scenario')}
             {renderTab('decks', 'Decks')}
@@ -101,11 +102,10 @@ export default class SettingsPane extends React.Component {
         </div>
         <ButtonDiv
           id={css.cancelArea}
-          style={{ display: this.state.visible ? 'initial' : 'none' }}
-          onClick={this.handleHideSettings}
+          style={{ display: this.props.visible ? 'initial' : 'none' }}
+          onClick={this.props.onHide}
         />
-        {settingsBtnTarget && ReactDOM.createPortal(settingsBtn, settingsBtnTarget)}
-      </React.Fragment>
+      </div>
     );
   }
 }

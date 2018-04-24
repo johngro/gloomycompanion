@@ -1,7 +1,7 @@
 import React from 'react';
 import { hot } from 'react-hot-loader';
 
-import SettingsPane from './SettingsPane';
+import SettingsPane, { SettingsButton } from './SettingsPane';
 import Tableau from './Tableau';
 import firebase, { useFirebase } from './firebase';
 
@@ -30,6 +30,7 @@ class App extends React.Component {
   state = {
     modDeckHidden: true,
     selectedDeckNames: [],
+    settingsVisible: true,
   }
 
   componentDidMount() {
@@ -63,6 +64,7 @@ class App extends React.Component {
     this.setState({ selectedDeckNames: snapshot.val() || [] });
   }
 
+  settingsBtnContainer = React.createRef();
   tableau = React.createRef();
 
   handleSelectDecks = (selectedDeckNames, showModifierDeck, preserve) => {
@@ -85,6 +87,9 @@ class App extends React.Component {
     }
   }
 
+  handleSettingsHide = () => this.setState({ settingsVisible: false });
+  handleSettingsShow = () => this.setState({ settingsVisible: true });
+
   render() {
     const deckSpecs = this.state.selectedDeckNames.map(d => ({
       id: (d.name || d.class).replace(/\s+/g, ''),
@@ -94,25 +99,25 @@ class App extends React.Component {
     }));
 
     return (
-      <React.Fragment>
-        <div id="panecontainer" className="panecontainer">
-          <SettingsPane onSelectDecks={this.handleSelectDecks} />
-        </div>
+      <React.StrictMode>
+        <SettingsPane
+          onHide={this.handleSettingsHide}
+          onSelectDecks={this.handleSelectDecks}
+          visible={this.state.settingsVisible}
+        />
         <div>
-          <div id="settingsbtncontainer" />
-          <div id="currentdecks">
-            <ul id="currentdeckslist" className="currentdeckslist" />
+          <div>
+            <SettingsButton onClick={this.handleSettingsShow} />
           </div>
+          <div id="currentdecks" />
         </div>
-        <div id="tableau" style={{ fontSize: '26.6px' }}>
-          <Tableau
-            deckSpecs={deckSpecs}
-            modDeckHidden={this.state.modDeckHidden}
-            ref={this.tableau}
-            useFirebase={useFirebase}
-          />
-        </div>
-      </React.Fragment>
+        <Tableau
+          deckSpecs={deckSpecs}
+          modDeckHidden={this.state.modDeckHidden}
+          ref={this.tableau}
+          useFirebase={useFirebase}
+        />
+      </React.StrictMode>
     );
   }
 }

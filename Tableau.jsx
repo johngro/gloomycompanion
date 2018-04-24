@@ -17,7 +17,7 @@ for (const definition of DECK_DEFINITONS) {
 }
 
 function VisibilityMenu(props) {
-  return ReactDOM.createPortal(props.deckSpecs.map(spec => (
+  const entries = props.deckSpecs.map(spec => (
     <li className={currentDeck} key={spec.id}>
       <a
         href={`#switch-${spec.id}`}
@@ -26,7 +26,11 @@ function VisibilityMenu(props) {
         {spec.name}
       </a>
     </li>
-  )), props.target);
+  ));
+  return ReactDOM.createPortal(
+    <ul className="currentdeckslist">{entries}</ul>,
+    props.target,
+  );
 }
 
 VisibilityMenu.propTypes = {
@@ -197,7 +201,7 @@ export default class Tableau extends React.Component {
       );
     });
 
-    const visMenuTarget = document.getElementById('currentdeckslist');
+    const visMenuTarget = document.getElementById('currentdecks');
     let visMenu = null;
     if (visMenuTarget) {
       visMenu = (
@@ -210,7 +214,7 @@ export default class Tableau extends React.Component {
     }
 
     return (
-      <React.Fragment>
+      <div id="tableau" style={{ fontSize: '26.6px' }}>
         {visMenu}
         <ModifierDeck
           deckState={this.state.modDeckState}
@@ -222,7 +226,7 @@ export default class Tableau extends React.Component {
           onRemoveSpecialClick={this.handleModDeckRemoveSpecial}
         />
         {decks}
-      </React.Fragment>
+      </div>
     );
   }
 }
