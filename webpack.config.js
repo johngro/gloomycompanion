@@ -8,7 +8,7 @@ const styleLoader = process.env.WEBPACK_SERVE ? 'style-loader' : MiniCssExtractP
 module.exports = {
   mode,
 
-  entry: './logic',
+  entry: './index',
   output: {
     filename: 'bundle.js',
     library: 'Gloom',
@@ -31,6 +31,7 @@ module.exports = {
             plugins: [
               '@babel/plugin-proposal-class-properties',
               '@babel/plugin-proposal-object-rest-spread',
+              'react-hot-loader/babel',
             ],
             presets: ['@babel/preset-env', '@babel/preset-react'],
           },

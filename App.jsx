@@ -1,4 +1,5 @@
 import React from 'react';
+import { hot } from 'react-hot-loader';
 
 import SettingsPane from './SettingsPane';
 import Tableau from './Tableau';
@@ -25,7 +26,7 @@ function refresh_ui() {
   }
 }
 
-export default class App extends React.Component {
+class App extends React.Component {
   state = {
     modDeckHidden: true,
     selectedDeckNames: [],
@@ -115,3 +116,5 @@ export default class App extends React.Component {
     );
   }
 }
+
+export default hot(module)(App);
