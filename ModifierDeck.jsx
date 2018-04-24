@@ -55,8 +55,10 @@ export default function ModifierDeck(props) {
     return <ButtonDiv className={classes} onClick={props.onEndRoundClick} />;
   };
 
+  const style = { display: props.hidden ? 'none' : 'block' };
+
   return (
-    <div className={css.cardContainer} id="modifier-container">
+    <div className={css.cardContainer} id="modifier-container" style={style}>
       <div className="modifier-deck-column-2">
         {renderDeck()}
         <ButtonDiv className="button draw-two" onClick={props.onDoubleDrawClick} />
@@ -82,6 +84,7 @@ export default function ModifierDeck(props) {
 
 ModifierDeck.propTypes = {
   deckState: PropTypes.instanceOf(ModifierDeckState).isRequired,
+  hidden: PropTypes.bool.isRequired,
   onDrawClick: PropTypes.func.isRequired,
   onDoubleDrawClick: PropTypes.func.isRequired,
   onEndRoundClick: PropTypes.func.isRequired,

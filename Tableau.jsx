@@ -36,8 +36,6 @@ VisibilityMenu.propTypes = {
 };
 
 export default class Tableau extends React.Component {
-  // FIXME: Implement state storage
-
   static getDerivedStateFromProps(nextProps, prevState) {
     const deckHidden = {};
     const deckState = {};
@@ -61,6 +59,7 @@ export default class Tableau extends React.Component {
 
   static propTypes = {
     deckSpecs: PropTypes.arrayOf(PropTypes.object).isRequired,
+    modDeckHidden: PropTypes.bool.isRequired,
     useFirebase: PropTypes.bool.isRequired,
   }
 
@@ -173,6 +172,14 @@ export default class Tableau extends React.Component {
     }
   }
 
+  reset() {
+    this.setState({
+      deckHidden: {},
+      deckState: {},
+      modDeckState: ModifierDeckState.create(),
+    });
+  }
+
   render() {
     const decks = this.props.deckSpecs.map((spec) => {
       if (!(spec.class in this.state.deckState) ||
@@ -189,15 +196,25 @@ export default class Tableau extends React.Component {
         />
       );
     });
-    return (
-      <React.Fragment>
+
+    const visMenuTarget = document.getElementById('currentdeckslist');
+    let visMenu = null;
+    if (visMenuTarget) {
+      visMenu = (
         <VisibilityMenu
           deckSpecs={this.props.deckSpecs}
           onToggleVisibility={this.handleToggleVisibility}
-          target={document.getElementById('currentdeckslist')}
+          target={visMenuTarget}
         />
+      );
+    }
+
+    return (
+      <React.Fragment>
+        {visMenu}
         <ModifierDeck
           deckState={this.state.modDeckState}
+          hidden={this.props.modDeckHidden}
           onDrawClick={this.handleModDeckDraw}
           onDoubleDrawClick={this.handleModDeckDoubleDraw}
           onEndRoundClick={this.handleModDeckEndRound}

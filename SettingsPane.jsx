@@ -74,6 +74,7 @@ export default class SettingsPane extends React.Component {
       );
     };
 
+    const settingsBtnTarget = document.getElementById('settingsbtncontainer');
     return (
       <React.Fragment>
         <div className={classNames(css.pane, { [css.inactive]: !this.state.visible })}>
@@ -103,7 +104,7 @@ export default class SettingsPane extends React.Component {
           style={{ display: this.state.visible ? 'initial' : 'none' }}
           onClick={this.handleHideSettings}
         />
-        {ReactDOM.createPortal(settingsBtn, document.getElementById('settingsbtncontainer'))}
+        {settingsBtnTarget && ReactDOM.createPortal(settingsBtn, settingsBtnTarget)}
       </React.Fragment>
     );
   }
