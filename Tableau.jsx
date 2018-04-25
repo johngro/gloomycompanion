@@ -6,75 +6,65 @@ import DeckState from './DeckState';
 import ModifierDeck from './ModifierDeck';
 import ModifierDeckState from './ModifierDeckState';
 import { DECK_DEFINITONS } from './cards';
-import firebase from './firebase';
+import { withStorage } from './storage';
+
+import * as CardCss from './style/Card.scss';
 
 const DEFINITIONS_BY_CLASS = {};
 for (const definition of DECK_DEFINITONS) {
   DEFINITIONS_BY_CLASS[definition.class] = definition;
 }
 
-export default class Tableau extends React.Component {
-  // FIXME: Support right-click to hide decks
+// This should be dynamic dependant on lines per card
+function refresh_ui() {
+  const actual_card_height = 296;
+  const base_font_size = 26.6;
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const deckState = {};
-    for (const spec of nextProps.deckSpecs) {
-      if (!(spec.class in deckState)) {
-        if (spec.class in prevState.deckState) {
-          deckState[spec.class] = prevState.deckState[spec.class];
-        } else {
-          deckState[spec.class] = DeckState.create(DEFINITIONS_BY_CLASS[spec.class], spec.name);
-        }
-      }
+  const tableau = document.getElementById('tableau');
+  const cards = tableau.getElementsByClassName(CardCss.card);
+  for (let i = 1; i < cards.length; i += 1) {
+    if (cards[i].className.indexOf(CardCss.ability) !== -1) {
+      const scale = cards[i].getBoundingClientRect().height / actual_card_height;
+      const scaled_font_size = base_font_size * scale;
+
+      const font_pixel_size = Math.min(scaled_font_size, base_font_size);
+      tableau.style.fontSize = `${font_pixel_size}px`;
+      break;
     }
-    if (nextProps.useFirebase) {
-      firebase.database().ref('deck_state').set(deckState);
-      return { };
-    }
-    return { deckState };
   }
+}
+
+class Tableau extends React.Component {
+  // FIXME: Support right-click to hide decks
 
   static propTypes = {
     deckSpecs: PropTypes.arrayOf(PropTypes.object).isRequired,
     deckVisible: PropTypes.objectOf(PropTypes.bool).isRequired,
     modDeckHidden: PropTypes.bool.isRequired,
-    useFirebase: PropTypes.bool.isRequired,
-  }
-
-  state = {
-    deckState: {},
-    modDeckState: ModifierDeckState.create(),
   }
 
   componentDidMount() {
-    if (this.props.useFirebase) {
-      this.modifierRef = firebase.database().ref('modifier');
-      this.modifierRef.on('value', this.onModifierChange, this);
-      this.deckStateRef = firebase.database().ref('deck_state');
-      this.deckStateRef.on('value', this.onDeckStateChange, this);
+    refresh_ui();
+    window.addEventListener('resize', refresh_ui);
+  }
+
+  componentDidUpdate(prevProps) {
+    for (const spec of this.props.deckSpecs) {
+      const hadSpec = prevProps.deckSpecs.some(s => s.id === spec.id);
+      const haveState = spec.class in this.props.storage.deckState;
+      if (!hadSpec || !haveState) {
+        // Make a new state!
+        console.log(`new spec: ${spec.id}`);
+        this.props.storageMutate('deckState', deckState => ({
+          ...deckState,
+          [spec.class]: DeckState.create(DEFINITIONS_BY_CLASS[spec.class], spec.name),
+        }));
+      }
     }
   }
 
   componentWillUnmount() {
-    if (this.props.useFirebase) {
-      this.modifierRef.off('value', this.onModifierChange, this);
-      this.deckStateRef.off('value', this.onDeckStateChange, this);
-    }
-  }
-
-  onModifierChange(snapshot) {
-    this.setState({
-      modDeckState: ModifierDeckState.create(snapshot.val()),
-    });
-  }
-
-  onDeckStateChange(snapshot) {
-    const deckState = {};
-    const upstream = snapshot.val();
-    for (const spec in upstream) {
-      deckState[spec] = DeckState.create(DEFINITIONS_BY_CLASS[spec], upstream[spec].name, upstream[spec]);
-    }
-    this.setState({ deckState });
+    window.removeEventListener('resize', refresh_ui);
   }
 
   handleDeckClick(deckClass) {
@@ -84,25 +74,11 @@ export default class Tableau extends React.Component {
         deckState[deckClass].reshuffle() :
         deckState[deckClass].draw_card(),
     });
-    if (this.props.useFirebase) {
-      const deckState = mutation(this.state.deckState);
-      this.deckStateRef.set(deckState);
-    } else {
-      this.setState(({ deckState }) => ({
-        deckState: mutation(deckState),
-      }));
-    }
+    this.props.storageMutate('deckState', mutation);
   }
 
   mutateModDeck(mutation) {
-    if (this.props.useFirebase) {
-      const modDeckState = mutation(this.state.modDeckState);
-      this.modifierRef.set(modDeckState.toJSON());
-    } else {
-      this.setState(({ modDeckState }) => ({
-        modDeckState: mutation(modDeckState),
-      }));
-    }
+    this.props.storageMutate('modDeckState', mutation);
   }
 
   handleModDeckDraw = () => {
@@ -130,23 +106,16 @@ export default class Tableau extends React.Component {
     this.mutateModDeck(mutation);
   }
 
-  reset() {
-    this.setState({
-      deckState: {},
-      modDeckState: ModifierDeckState.create(),
-    });
-  }
-
   render() {
     const decks = this.props.deckSpecs.map((spec) => {
-      if (!(spec.class in this.state.deckState)) {
+      if (!(spec.class in this.props.storage.deckState)) {
         return null;
       }
       return (
         <AbilityDeck
           key={spec.id}
           spec={spec}
-          deckState={this.state.deckState[spec.class]}
+          deckState={this.props.storage.deckState[spec.class]}
           onClick={() => this.handleDeckClick(spec.class)}
           hidden={!this.props.deckVisible[spec.id]}
         />
@@ -156,7 +125,7 @@ export default class Tableau extends React.Component {
     return (
       <div id="tableau" style={{ fontSize: '26.6px' }}>
         <ModifierDeck
-          deckState={this.state.modDeckState}
+          deckState={this.props.storage.modDeckState}
           hidden={this.props.modDeckHidden}
           onDrawClick={this.handleModDeckDraw}
           onDoubleDrawClick={this.handleModDeckDoubleDraw}
@@ -169,3 +138,21 @@ export default class Tableau extends React.Component {
     );
   }
 }
+
+export default withStorage(Tableau, {
+  modDeckState: {
+    path: 'modifier',
+    deserialize: ModifierDeckState.create,
+    serialize: s => s.toJSON(),
+  },
+  deckState: {
+    path: 'deck_state',
+    deserialize: (value) => {
+      const result = {};
+      for (const [deckClass, state] of Object.entries(value || {})) {
+        result[deckClass] = DeckState.create(DEFINITIONS_BY_CLASS[deckClass], state.name, state);
+      }
+      return result;
+    },
+  },
+});
