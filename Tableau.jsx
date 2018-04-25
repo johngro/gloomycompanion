@@ -6,7 +6,7 @@ import DeckState from './DeckState';
 import ModifierDeck from './ModifierDeck';
 import ModifierDeckState from './ModifierDeckState';
 import { DECK_DEFINITONS } from './cards';
-import { withStorage } from './storage';
+import { storageValueProp, withStorage } from './storage';
 
 import * as CardCss from './style/Card.scss';
 
@@ -39,8 +39,10 @@ class Tableau extends React.Component {
 
   static propTypes = {
     deckSpecs: PropTypes.arrayOf(PropTypes.object).isRequired,
+    deckState: storageValueProp(PropTypes.object).isRequired,
     deckVisible: PropTypes.objectOf(PropTypes.bool).isRequired,
     modDeckHidden: PropTypes.bool.isRequired,
+    modDeckState: storageValueProp(PropTypes.object).isRequired,
   }
 
   componentDidMount() {
@@ -51,11 +53,11 @@ class Tableau extends React.Component {
   componentDidUpdate(prevProps) {
     for (const spec of this.props.deckSpecs) {
       const hadSpec = prevProps.deckSpecs.some(s => s.id === spec.id);
-      const haveState = spec.class in this.props.storage.deckState;
+      const haveState = spec.class in this.props.deckState.value;
       if (!hadSpec || !haveState) {
         // Make a new state!
         console.log(`new spec: ${spec.id}`);
-        this.props.storageMutate('deckState', deckState => ({
+        this.props.deckState.mutate(deckState => ({
           ...deckState,
           [spec.class]: DeckState.create(DEFINITIONS_BY_CLASS[spec.class], spec.name),
         }));
@@ -74,11 +76,11 @@ class Tableau extends React.Component {
         deckState[deckClass].reshuffle() :
         deckState[deckClass].draw_card(),
     });
-    this.props.storageMutate('deckState', mutation);
+    this.props.deckState.mutate(mutation);
   }
 
   mutateModDeck(mutation) {
-    this.props.storageMutate('modDeckState', mutation);
+    this.props.modDeckState.mutate(mutation);
   }
 
   handleModDeckDraw = () => {
@@ -108,14 +110,14 @@ class Tableau extends React.Component {
 
   render() {
     const decks = this.props.deckSpecs.map((spec) => {
-      if (!(spec.class in this.props.storage.deckState)) {
+      if (!(spec.class in this.props.deckState.value)) {
         return null;
       }
       return (
         <AbilityDeck
           key={spec.id}
           spec={spec}
-          deckState={this.props.storage.deckState[spec.class]}
+          deckState={this.props.deckState.value[spec.class]}
           onClick={() => this.handleDeckClick(spec.class)}
           hidden={!this.props.deckVisible[spec.id]}
         />
@@ -125,7 +127,7 @@ class Tableau extends React.Component {
     return (
       <div id="tableau" style={{ fontSize: '26.6px' }}>
         <ModifierDeck
-          deckState={this.props.storage.modDeckState}
+          deckState={this.props.modDeckState.value}
           hidden={this.props.modDeckHidden}
           onDrawClick={this.handleModDeckDraw}
           onDoubleDrawClick={this.handleModDeckDoubleDraw}

@@ -4,7 +4,7 @@ import { hot } from 'react-hot-loader';
 
 import SettingsPane from './SettingsPane';
 import Tableau from './Tableau';
-import { withStorage } from './storage';
+import { storageValueProp, withStorage } from './storage';
 
 import * as SettingsCss from './style/SettingsPane.scss';
 import * as TableauCss from './style/Tableau.scss';
@@ -45,22 +45,28 @@ VisibilityMenu.propTypes = {
 };
 
 class App extends React.Component {
+  static propTypes = {
+    deckSpecs: storageValueProp(PropTypes.array).isRequired,
+    deckVisible: storageValueProp(PropTypes.object).isRequired,
+    modDeckHidden: storageValueProp(PropTypes.bool).isRequired,
+  }
+
   state = { settingsVisible: true }
 
   tableau = React.createRef();
 
   handleDeckVisibilityToggle = (deckId) => {
     const mutation = deckVis => ({ ...deckVis, [deckId]: !deckVis[deckId] });
-    this.props.storageMutate('deckVisible', mutation);
+    this.props.deckVisible.mutate(mutation);
   }
 
   handleSelectDecks = (deckSpecs, showModifierDeck, preserve) => {
     if (!preserve) {
       this.tableau.current.reset();
     }
-    this.props.storageMutate('modDeckHidden', () => !showModifierDeck);
-    this.props.storageMutate('deckSpecs', () => deckSpecs);
-    this.props.storageMutate('deckVisible', (old) => {
+    this.props.modDeckHidden.mutate(() => !showModifierDeck);
+    this.props.deckSpecs.mutate(() => deckSpecs);
+    this.props.deckVisible.mutate((old) => {
       const deckVisible = {};
       for (const { id } of deckSpecs) {
         deckVisible[id] = id in old ? old[id] : true;
@@ -83,14 +89,14 @@ class App extends React.Component {
         <div>
           <SettingsButton onClick={this.handleSettingsShow} />
           <VisibilityMenu
-            deckSpecs={this.props.storage.deckSpecs}
+            deckSpecs={this.props.deckSpecs.value}
             onToggleVisibility={this.handleDeckVisibilityToggle}
           />
         </div>
         <Tableau
-          deckSpecs={this.props.storage.deckSpecs}
-          deckVisible={this.props.storage.deckVisible}
-          modDeckHidden={this.props.storage.modDeckHidden}
+          deckSpecs={this.props.deckSpecs.value}
+          deckVisible={this.props.deckVisible.value}
+          modDeckHidden={this.props.modDeckHidden.value}
           ref={this.tableau}
         />
       </React.StrictMode>
