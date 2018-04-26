@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { hot } from 'react-hot-loader';
 
+import ButtonDiv from './ButtonDiv';
 import SettingsPane from './SettingsPane';
 import Tableau from './Tableau';
 import { storageValueProp, withStorage } from './storage';
@@ -28,12 +29,12 @@ SettingsButton.propTypes = {
 function VisibilityMenu(props) {
   const entries = props.deckSpecs.map(spec => (
     <li className={TableauCss.currentDeck} key={spec.id}>
-      <a
-        href={`#switch-${spec.id}`}
+      <ButtonDiv
+        className={TableauCss.button}
         onClick={() => props.onToggleVisibility(spec.id)}
       >
         {spec.name}
-      </a>
+      </ButtonDiv>
     </li>
   ));
   return <ul className="currentdeckslist">{entries}</ul>;
