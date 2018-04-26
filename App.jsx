@@ -1,121 +1,46 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import { hot } from 'react-hot-loader';
+import uuidv4 from 'uuid/v4';
 
-import ButtonDiv from './ButtonDiv';
-import SettingsPane from './SettingsPane';
-import Tableau from './Tableau';
-import { storageValueProp, withStorage } from './storage';
-
-import * as SettingsCss from './style/SettingsPane.scss';
-import * as TableauCss from './style/Tableau.scss';
-
-function SettingsButton(props) {
-  return (
-    <input
-      alt="Configure"
-      id={SettingsCss.settingsButton}
-      type="image"
-      src="images/settings.svg"
-      onClick={props.onClick}
-    />
-  );
-}
-
-SettingsButton.propTypes = {
-  onClick: PropTypes.func.isRequired,
-};
-
-function VisibilityMenu(props) {
-  const entries = props.deckSpecs.map(spec => (
-    <li className={TableauCss.currentDeck} key={spec.id}>
-      <ButtonDiv
-        className={TableauCss.button}
-        onClick={() => props.onToggleVisibility(spec.id)}
-      >
-        {spec.name}
-      </ButtonDiv>
-    </li>
-  ));
-  return <ul className="currentdeckslist">{entries}</ul>;
-}
-
-VisibilityMenu.propTypes = {
-  deckSpecs: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onToggleVisibility: PropTypes.func.isRequired,
-};
+import MainUI from './MainUI';
+import { useFirebase } from './firebase';
+import { StorageContext } from './storage';
 
 class App extends React.Component {
-  static propTypes = {
-    deckSpecs: storageValueProp(PropTypes.array).isRequired,
-    deckVisible: storageValueProp(PropTypes.object).isRequired,
-    modDeckHidden: storageValueProp(PropTypes.bool).isRequired,
+  state = { locationHash: window.location.hash };
+
+  componentDidMount() {
+    window.addEventListener('hashchange', this.handleHashChange);
+    this.handleHashChange();
   }
 
-  state = { settingsVisible: true }
-
-  tableau = React.createRef();
-
-  handleDeckVisibilityToggle = (deckId) => {
-    const mutation = deckVis => ({ ...deckVis, [deckId]: !deckVis[deckId] });
-    this.props.deckVisible.mutate(mutation);
+  componentWillUnmount() {
+    window.removeEventListener('hashchange', this.handleHashChange);
   }
 
-  handleSelectDecks = (deckSpecs, showModifierDeck, preserve) => {
-    if (!preserve) {
-      this.tableau.current.reset();
+  handleHashChange = () => {
+    if (useFirebase && window.location.hash.length === 0) {
+      window.location.hash = `#${uuidv4()}`;
     }
-    this.props.modDeckHidden.mutate(() => !showModifierDeck);
-    this.props.deckSpecs.mutate(() => deckSpecs);
-    this.props.deckVisible.mutate((old) => {
-      const deckVisible = {};
-      for (const { id } of deckSpecs) {
-        deckVisible[id] = id in old ? old[id] : true;
-      }
-      return deckVisible;
-    });
+    if (window.location.hash !== this.state.locationHash) {
+      this.setState({ locationHash: window.location.hash });
+    }
   }
-
-  handleSettingsHide = () => this.setState({ settingsVisible: false });
-  handleSettingsShow = () => this.setState({ settingsVisible: true });
 
   render() {
+    const storageContext = { useFirebase };
+    if (useFirebase && this.state.locationHash) {
+      const gameUuid = this.state.locationHash.slice(1);
+      storageContext.firebaseRoot = `games/${gameUuid}/`;
+    }
     return (
       <React.StrictMode>
-        <SettingsPane
-          onHide={this.handleSettingsHide}
-          onSelectDecks={this.handleSelectDecks}
-          visible={this.state.settingsVisible}
-        />
-        <div>
-          <SettingsButton onClick={this.handleSettingsShow} />
-          <VisibilityMenu
-            deckSpecs={this.props.deckSpecs.value}
-            onToggleVisibility={this.handleDeckVisibilityToggle}
-          />
-        </div>
-        <Tableau
-          deckSpecs={this.props.deckSpecs.value}
-          deckVisible={this.props.deckVisible.value}
-          modDeckHidden={this.props.modDeckHidden.value}
-          ref={this.tableau}
-        />
+        <StorageContext.Provider value={storageContext}>
+          <MainUI />
+        </StorageContext.Provider>
       </React.StrictMode>
     );
   }
 }
 
-export default hot(module)(withStorage(App, {
-  deckSpecs: {
-    path: 'selected_decks',
-    deserialize: value => value || [],
-  },
-  deckVisible: {
-    path: 'deck_visible',
-    deserialize: value => value || {},
-  },
-  modDeckHidden: {
-    path: 'mod_deck_hidden',
-    deserialize: value => (typeof value === 'boolean' ? value : true),
-  },
-}));
+export default hot(module)(App);

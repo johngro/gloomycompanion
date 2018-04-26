@@ -1,35 +1,60 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import firebase, { useFirebase } from './firebase';
+import firebase from './firebase';
+
+export const StorageContext = React.createContext({});
 
 export function withStorage(Component, mapping) {
-  const defaultLoaded = {};
-  const defaultValues = {};
-  for (const [key, settings] of Object.entries(mapping)) {
-    const { deserialize = x => x } = settings;
-    defaultLoaded[key] = !useFirebase;
-    defaultValues[key] = deserialize(null);
-  }
+  class WithStorage extends React.Component {
+    static propTypes = {
+      context: PropTypes.shape({
+        firebaseRoot: PropTypes.string,
+        useFirebase: PropTypes.bool,
+      }).isRequired,
+    }
 
-  return class WithStorage extends React.Component {
-    state = { loaded: defaultLoaded, values: defaultValues }
+    static getDerivedStateFromProps(nextProps, prevState) {
+      if (nextProps.context !== prevState.lastContext) {
+        const defaultLoaded = {};
+        const defaultValues = {};
+        for (const [key, settings] of Object.entries(mapping)) {
+          const { deserialize = x => x } = settings;
+          defaultLoaded[key] = !nextProps.context.useFirebase;
+          defaultValues[key] = deserialize(null);
+        }
+        return {
+          defaultValues,
+          lastContext: nextProps.context,
+          loaded: defaultLoaded,
+          values: defaultValues,
+        };
+      }
+      return null;
+    }
+
+    state = {}
 
     componentDidMount() {
-      if (useFirebase) {
-        this.storageRefs = {};
-        for (const [key, settings] of Object.entries(mapping)) {
-          this.storageRefs[key] = firebase.database().ref(settings.path);
-          this.storageRefs[key].on('value', snap => this.setStateKey(key, () => snap.val()));
+      if (this.props.context.useFirebase) {
+        this.firebaseRegister();
+      }
+    }
+
+    componentDidUpdate(prevProps) {
+      if (this.props.context !== prevProps.context) {
+        if (prevProps.context.useFirebase) {
+          this.firebaseCleanup();
+        }
+        if (this.props.context.useFirebase) {
+          this.firebaseRegister();
         }
       }
     }
 
     componentWillUnmount() {
-      if (useFirebase) {
-        for (const ref of Object.values(this.storageRefs)) {
-          ref.off();
-        }
+      if (this.props.context.useFirebase) {
+        this.firebaseCleanup();
       }
     }
 
@@ -41,9 +66,24 @@ export function withStorage(Component, mapping) {
       }));
     }
 
+    firebaseCleanup() {
+      for (const ref of Object.values(this.storageRefs)) {
+        ref.off();
+      }
+    }
+
+    firebaseRegister() {
+      const prefix = this.props.context.firebaseRoot || '';
+      this.storageRefs = {};
+      for (const [key, settings] of Object.entries(mapping)) {
+        this.storageRefs[key] = firebase.database().ref(prefix + settings.path);
+        this.storageRefs[key].on('value', snap => this.setStateKey(key, () => snap.val()));
+      }
+    }
+
     mutate(key, mutator) {
       const { serialize = x => x, deserialize = x => x } = mapping[key];
-      if (useFirebase) {
+      if (this.props.context.useFirebase) {
         this.storageRefs[key].transaction(v => serialize(mutator(deserialize(v))));
       } else {
         this.setStateKey(key, v => serialize(mutator(v)));
@@ -51,12 +91,12 @@ export function withStorage(Component, mapping) {
     }
 
     reset() {
-      if (useFirebase) {
+      if (this.props.context.useFirebase) {
         for (const ref of Object.values(this.storageRefs)) {
           ref.remove();
         }
       } else {
-        this.setState({ values: defaultValues });
+        this.setState({ values: this.state.defaultValues });
       }
     }
 
@@ -73,7 +113,15 @@ export function withStorage(Component, mapping) {
       }
       return <Component {...this.props} {...valueProps} />;
     }
-  };
+  }
+
+  const forwardRef = (props, ref) => (
+    <StorageContext.Consumer>
+      {context => <WithStorage {...props} context={context} ref={ref} />}
+    </StorageContext.Consumer>
+  );
+  forwardRef.displayName = `withStorage(${Component.displayName || Component.name})`;
+  return React.forwardRef(forwardRef);
 }
 
 export function storageValueProp(valueType) {
