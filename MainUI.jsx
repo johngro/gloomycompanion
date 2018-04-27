@@ -36,7 +36,7 @@ function VisibilityMenu(props) {
       </ButtonDiv>
     </li>
   ));
-  return <ul className="currentdeckslist">{entries}</ul>;
+  return <ul className={TableauCss.currentDeckList}>{entries}</ul>;
 }
 
 VisibilityMenu.propTypes = {

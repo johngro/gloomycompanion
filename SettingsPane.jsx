@@ -61,7 +61,7 @@ export default class SettingsPane extends React.Component {
     };
 
     return (
-      <div id="panecontainer" className="panecontainer">
+      <div className={css.paneContainer}>
         <div className={classNames(css.pane, { [css.inactive]: !this.props.visible })}>
           <ul className={css.tabContainer} role="tablist">
             {renderTab('scenarios', 'Scenario')}

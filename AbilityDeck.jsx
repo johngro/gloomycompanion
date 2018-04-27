@@ -90,7 +90,6 @@ export default function AbilityDeck(props) {
   const [topDiscard, sndDiscard] = props.deckState.discard;
   return (
     <ButtonDiv
-      id={spec.id}
       className={props.hidden ? css.hiddenDeck : css.cardContainer}
       onClick={props.onClick}
     >

@@ -9,6 +9,7 @@ import { DECK_DEFINITONS } from './cards';
 import { storageValueProp, withStorage } from './storage';
 
 import * as CardCss from './style/Card.scss';
+import * as css from './style/Tableau.scss';
 
 const DEFINITIONS_BY_CLASS = {};
 for (const definition of DECK_DEFINITONS) {
@@ -20,7 +21,7 @@ function refresh_ui() {
   const actual_card_height = 296;
   const base_font_size = 26.6;
 
-  const tableau = document.getElementById('tableau');
+  const tableau = document.getElementById(css.tableau);
   const cards = tableau.getElementsByClassName(CardCss.card);
   for (let i = 1; i < cards.length; i += 1) {
     if (cards[i].className.indexOf(CardCss.ability) !== -1) {
@@ -125,7 +126,7 @@ class Tableau extends React.Component {
     });
 
     return (
-      <div id="tableau" style={{ fontSize: '26.6px' }}>
+      <div id={css.tableau} style={{ fontSize: '26.6px' }}>
         <ModifierDeck
           deckState={this.props.modDeckState.value}
           hidden={this.props.modDeckHidden}

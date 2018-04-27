@@ -58,7 +58,7 @@ export default function ModifierDeck(props) {
   const style = { display: props.hidden ? 'none' : 'block' };
 
   return (
-    <div className={css.cardContainer} id="modifier-container" style={style}>
+    <div className={css.cardContainer} style={style}>
       <div className="modifier-deck-column-2">
         {renderDeck()}
         <ButtonDiv className="button draw-two" onClick={props.onDoubleDrawClick} />

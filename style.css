@@ -10,33 +10,3 @@ body
 {
     white-space:        nowrap;
 }
-
-#tableau
-{
-    display:            flex;
-    flex-wrap:          wrap;
-    justify-content:    space-around;
-}
-
-@media only screen and (max-height: 480px) and (orientation: portrait) {
-    #tableau {
-        box-orient: vertical;
-    }
-}
-
-.panecontainer
-{
-    position:           fixed;
-    top:                0;
-    left:               0;
-    max-width:          100vw;
-    height:             0;
-    z-index:            2;
-}
-
-ul.currentdeckslist {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-}

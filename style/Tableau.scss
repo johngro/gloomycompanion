@@ -1,3 +1,10 @@
+.current-deck-list {
+  list-style-type: none;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
 .current-deck {
   $hover-color: #aaa;
 
@@ -12,5 +19,15 @@
     &:hover {
       background-color: $hover-color;
     }
+  }
+}
+
+#tableau {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+
+  @media only screen and (max-height: 480px) and (orientation: portrait) {
+    box-orient: vertical;
   }
 }
