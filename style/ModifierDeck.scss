@@ -1,0 +1,134 @@
+@mixin text-border($color) {
+  text-shadow: -1px -1px 0 $color, 1px -1px 0 $color, -1px 1px 0 $color, 1px 1px 0 $color;
+}
+
+.counter-icon {
+  border: 0;
+  display: flex;
+  flex-direction: row;
+
+  height: 22%;
+
+  justify-content: center;
+  list-style: none;
+  margin: 30% 0;
+
+  outline: none;
+  overflow: visible;
+  position: relative;
+
+  .background {
+    background-color: Transparent;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 100%;
+    opacity: .5;
+    position: absolute;
+    width: 100%;
+    z-index: -1;
+
+    &.curse {
+      background-image: url('../images/curse.svg');
+    }
+
+    &.bless {
+      background-image: url('../images/bless.svg');
+    }
+  }
+
+  &.shuffle {
+    background-image: url('../images/shuffle-black.svg');
+    background-position: 100% 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    bottom: -40%;
+
+    cursor: pointer;
+    height: 20%;
+    left: 0;
+    position: absolute;
+    width: 20%;
+
+    &.not-required {
+      opacity: .2;
+    }
+  }
+
+  .button {
+    $text-border-color: #fff;
+    @include text-border($text-border-color);
+
+    cursor: pointer;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 180%;
+
+    font-weight: bold;
+    height: 100%;
+    margin: 0;
+
+    touch-callout: none;
+    user-select: none;
+
+    width: 33%;
+  }
+}
+
+.button {
+  &.increment {
+    $increment-color: #080;
+    color: $increment-color;
+  }
+
+  &.decrement {
+    $decrement-color: #800;
+    color: $decrement-color;
+  }
+
+  &.draw-two {
+    background-image: url('../images/draw-two.svg');
+    background-position: 100% 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    bottom: 0;
+    cursor: pointer;
+    height: 20%;
+    position: absolute;
+    right: 33%;
+    width: 20%;
+  }
+}
+
+.icon-text {
+  $text-color: #fff;
+  $text-border-color: #000;
+  @include text-border($text-border-color);
+
+  color: $text-color;
+  font-family: 'Nyala', 'Sakkal Majalla', 'Philosopher', sans-serif;
+  font-size: 150%;
+  height: 100%;
+
+  line-height: 1.5;
+  margin: 0;
+
+  text-align: center;
+  width: 32%;
+}
+
+.modifier-deck-column-1 {
+  float: left;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  width: 20%;
+}
+
+.modifier-deck-column-2 {
+  float: right;
+  height: 100%;
+  margin: 0;
+  margin-left: -30%;
+  padding: 0;
+  width: 100%;
+}

@@ -8,7 +8,8 @@ import ModifierCardCounter from './ModifierCardCounter';
 import ModifierCardFront from './ModifierCardFront';
 import ModifierDeckState from './ModifierDeckState';
 
-import * as css from './style/Card.scss';
+import * as CardCss from './style/Card.scss';
+import * as css from './style/ModifierDeck.scss';
 
 export default function ModifierDeck(props) {
   const renderCard = (card, zIndex, cardClasses, faceUp) => (
@@ -31,26 +32,26 @@ export default function ModifierDeck(props) {
 
     if (props.deckState.advantage_card == null) {
       return (
-        <ButtonDiv className={classNames(css.cardContainer, css.modifier)} onClick={props.onDrawClick}>
-          {topDraw ? renderCard(topDraw, -7, [css.draw], false) : null}
-          {topDiscard ? renderCard(topDiscard, -3, [css.discard, css.pull], true) : null}
-          {sndDiscard ? renderCard(sndDiscard, -4, [css.discard, css.lift], true) : null}
+        <ButtonDiv className={classNames(CardCss.cardContainer, CardCss.modifier)} onClick={props.onDrawClick}>
+          {topDraw ? renderCard(topDraw, -7, [CardCss.draw], false) : null}
+          {topDiscard ? renderCard(topDiscard, -3, [CardCss.discard, CardCss.pull], true) : null}
+          {sndDiscard ? renderCard(sndDiscard, -4, [CardCss.discard, CardCss.lift], true) : null}
         </ButtonDiv>
       );
     }
     return (
-      <ButtonDiv className={classNames(css.cardContainer, css.modifier)} onClick={props.onDrawClick}>
-        {topDraw ? renderCard(topDraw, -7, [css.draw], false) : null}
-        {renderCard(topDiscard, -3, [css.discard, css.pull, css.right], true)}
-        {renderCard(sndDiscard, -3, [css.discard, css.pull, css.left], true)}
-        {thdDiscard ? renderCard(thdDiscard, -4, [css.discard, css.lift], true) : null}
+      <ButtonDiv className={classNames(CardCss.cardContainer, CardCss.modifier)} onClick={props.onDrawClick}>
+        {topDraw ? renderCard(topDraw, -7, [CardCss.draw], false) : null}
+        {renderCard(topDiscard, -3, [CardCss.discard, CardCss.pull, CardCss.right], true)}
+        {renderCard(sndDiscard, -3, [CardCss.discard, CardCss.pull, CardCss.left], true)}
+        {thdDiscard ? renderCard(thdDiscard, -4, [CardCss.discard, CardCss.lift], true) : null}
       </ButtonDiv>
     );
   };
 
   const shuffleIndicator = (needsShuffled) => {
-    const classes = classNames('counter-icon', 'shuffle', {
-      'not-required': !needsShuffled,
+    const classes = classNames(css.counterIcon, css.shuffle, {
+      [css.notRequired]: !needsShuffled,
     });
     return <ButtonDiv className={classes} onClick={props.onEndRoundClick} />;
   };
@@ -58,12 +59,12 @@ export default function ModifierDeck(props) {
   const style = { display: props.hidden ? 'none' : 'block' };
 
   return (
-    <div className={css.cardContainer} style={style}>
-      <div className="modifier-deck-column-2">
+    <div className={CardCss.cardContainer} style={style}>
+      <div className={css.modifierDeckColumn2}>
         {renderDeck()}
-        <ButtonDiv className="button draw-two" onClick={props.onDoubleDrawClick} />
+        <ButtonDiv className={`${css.button} ${css.drawTwo}`} onClick={props.onDoubleDrawClick} />
       </div>
-      <div className="modifier-deck-column-1">
+      <div className={css.modifierDeckColumn1}>
         <ModifierCardCounter
           deckState={props.deckState}
           modifierType="bless"
