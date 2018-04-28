@@ -23,6 +23,7 @@ export default class DeckState {
 
         draw_pile.push(card);
       }
+      shuffle_list(draw_pile);
     } else {
       draw_pile = storageState.draw_pile || [];
       discard = storageState.discard || [];
