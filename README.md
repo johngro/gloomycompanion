@@ -1,20 +1,38 @@
 # Gloomy Companion
 
-This is a web-app for managing the monster ability decks in the board game [Gloomhaven](https://boardgamegeek.com/boardgame/174430/gloomhaven)
+This is a web-app for managing the monster ability decks in the board game [Gloomhaven](https://boardgamegeek.com/boardgame/174430/gloomhaven).
 
-You can run it from the web directly on <https://johreh.github.io/gloomycompanion/>.
+This is a fork of [johreh's Gloomy Companion](https://johreh.github.io/gloomycompanion/>).  This fork focuses on adding support for synchronized game state across browsers, in order to support remote play.  It can be configured to store the state in [Firebase](https://firebase.google.com), and can manage multiple game states at the same time.  Each game session is identified by a unique URL, which is generated on initial visit to the game site.
 
-You can also download it and run it locally without internet connection. Click __Clone or download__ above, then __Download ZIP__. Unpack the ZIP and start the app by opening `index.html`.
+## Local testing
 
-If you want to add new cards, you need to update `cards.js`. The decks has the following syntax:
+1) Open a shell to your source checkout.
+2) Run `yarn` to install all dependencies
+3) Run `yarn run serve` to build the project and launch a local webserver.  The webserver will monitor the source files for changes and rebuild the code automatically.
+
+If you would prefer to use a docker environment for testing, the `docker.sh` script provides a convenient way of launching a docker instance and running the yarn commands above.
+
+## Deployment
+
+1) Open a shell to your source checkout.
+2) Run `mv index.prod.html index.html`
+3) Run `yarn` to install all dependencies.
+4) Run `yarn run build:prod` to build the project.
+5) Point your webserver of choice at the source checkout.
+
+## Configuration (necessary for Firebase support)
+
+To make a custom configuration, create a file in the source directory named "config.local.js". 
+```javascript
+export const localConfig = {
+  useFirebase: true,
+  firebase: {
+      apiKey: "your apiKey here",
+      authDomain: "your authDomain here",
+      databaseURL: "your databaseURL here",
+      projectId: "your projectId here",
+      storageBucket: "your storageBucket here",
+      messagingSenderId: "your messagingSenderId here"
+  }
+};
 ```
-{ name: "Name of monster"
-, cards:
-  [ [false, "42", "* First line", "** sub-line 1", "** sub-line 2", "* Second line"]
-  , [true,  "55", "* Card text"]
-  ]
-}
-```
-The value in the first column is `true` if the deck shall be reshuffled after that card, `false` otherwise. The second colum is card initiative value. The following values is the card text, one row per column.
-
-A single `*` means a top-level action. Double asterisk `**` means it modifies the previous action. Commonly used text snippets can be expanded using macros. E.g. `%move%` expands to the text _Move_ followed by the move icon, `%immobilize%` expands to _IMMOBILIZE_ followed by the immobilization icon. The list of available macros can be seen in `macros.js`.

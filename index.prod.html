@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html manifest="app.manifest">
+  <head>
+    <title>Gloomy Companion</title>
+    <link rel="apple-touch-icon" sizes="192x192" href="images/icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="images/icon.png" />
+    <link rel="manifest" href="app.webmanifest" />
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="Gloomy Companion" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="./dist/main.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="https://unpkg.com/prop-types@15.6.0/prop-types.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@16.3.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16.3.0/umd/react-dom.production.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-database.js"></script>
+    <script type="text/javascript" src="./dist/bundle.js"></script>
+  </body>
+</html>
