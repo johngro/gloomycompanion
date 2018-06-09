@@ -2,7 +2,7 @@
 
 This is a web-app for managing the monster ability decks in the board game [Gloomhaven](https://boardgamegeek.com/boardgame/174430/gloomhaven).
 
-This is a fork of [johreh's Gloomy Companion](https://johreh.github.io/gloomycompanion/>).  This fork focuses on adding support for synchronized game state across browsers, in order to support remote play.  It can be configured to store the state in [Firebase](https://firebase.google.com), and can manage multiple game states at the same time.  Each game session is identified by a unique URL, which is generated on initial visit to the game site.
+This is a fork of [johreh's Gloomy Companion](https://johreh.github.io/gloomycompanion/).  This fork focuses on adding support for synchronized game state across browsers, in order to support remote play.  It can be configured to store the state in [Firebase](https://firebase.google.com), and can manage multiple game states at the same time.  Each game session is identified by a unique URL, which is generated on initial visit to the game site.
 
 ## Local testing
 
