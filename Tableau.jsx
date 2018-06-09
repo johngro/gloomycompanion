@@ -71,6 +71,10 @@ class Tableau extends React.Component {
     window.removeEventListener('resize', refresh_ui);
   }
 
+  // lastFlippedDeckClass keeps track of the class of deck which most recently
+  // had a card drawn on it, but has not yet been rendererd.
+  lastFlippedDeckClass = null;
+
   handleDeckClick(deckClass) {
     const mutation = deckState => ({
       ...deckState,
@@ -79,6 +83,7 @@ class Tableau extends React.Component {
         deckState[deckClass].draw_card(),
     });
     this.props.deckState.mutate(mutation);
+    this.lastFlippedDeckClass = deckClass;
   }
 
   mutateModDeck(mutation) {
@@ -123,9 +128,12 @@ class Tableau extends React.Component {
           onClick={() => this.handleDeckClick(spec.class)}
           hidden={!this.props.deckVisible[spec.id]}
           showBaseStats={this.props.showBaseStats}
+          showFlip={this.lastFlippedDeckClass === spec.class}
         />
       );
     });
+
+    this.lastFlippedDeckClass = null;
 
     return (
       <div id={css.tableau} style={{ fontSize: '26.6px' }}>

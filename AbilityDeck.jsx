@@ -247,6 +247,8 @@ export default function AbilityDeck(props) {
 
   const [topDraw] = props.deckState.draw_pile;
   const [topDiscard, sndDiscard] = props.deckState.discard;
+  const pullAnim = props.showFlip ? css.pull : null;
+  const liftAnim = props.showFlip ? css.lift : null;
   return (
     <div
       className={props.hidden ? css.hiddenDeck : css.abilityDeckContainer}
@@ -257,8 +259,8 @@ export default function AbilityDeck(props) {
           onClick={props.onClick}
         >
           {topDraw ? renderCard(topDraw, -7, [css.draw], false) : null}
-          {topDiscard ? renderCard(topDiscard, -3, [css.discard, css.pull], true) : null}
-          {sndDiscard ? renderCard(sndDiscard, -4, [css.discard, css.lift], true) : null}
+          {topDiscard ? renderCard(topDiscard, -3, [css.discard, pullAnim], true) : null}
+          {sndDiscard ? renderCard(sndDiscard, -4, [css.discard, liftAnim], true) : null}
         </ButtonDiv>
         { props.showBaseStats ? renderBaseStats() : null }
       </div>
@@ -281,6 +283,7 @@ AbilityDeck.propTypes = {
   }).isRequired,
   deckState: PropTypes.instanceOf(DeckState).isRequired,
   onClick: PropTypes.func.isRequired,
+  showFlip: PropTypes.bool.isRequired,
   hidden: PropTypes.bool,
   showBaseStats: PropTypes.bool,
 };
