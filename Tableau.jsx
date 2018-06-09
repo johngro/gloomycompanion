@@ -44,6 +44,7 @@ class Tableau extends React.Component {
     deckVisible: PropTypes.objectOf(PropTypes.bool).isRequired,
     modDeckHidden: PropTypes.bool.isRequired,
     modDeckState: storageValueProp(PropTypes.object).isRequired,
+    showBaseStats: PropTypes.bool.isRequired,
   }
 
   componentDidMount() {
@@ -121,6 +122,7 @@ class Tableau extends React.Component {
           deckState={this.props.deckState.value[spec.class]}
           onClick={() => this.handleDeckClick(spec.class)}
           hidden={!this.props.deckVisible[spec.id]}
+          showBaseStats={this.props.showBaseStats}
         />
       );
     });

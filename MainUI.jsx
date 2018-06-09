@@ -25,21 +25,46 @@ SettingsButton.propTypes = {
   onClick: PropTypes.func.isRequired,
 };
 
-function VisibilityMenu(props) {
-  const { onToggleVisibility } = props;
-  const entries = props.deckSpecs.map(spec => (
-    <li className={TableauCss.currentDeck} key={spec.id}>
-      <ButtonDiv className={TableauCss.button} onClick={() => onToggleVisibility(spec.id)}>
-        {spec.name}
+function VisibilityButton(props) {
+  return (
+    <li className={TableauCss.currentDeck} key={props.id}>
+      <ButtonDiv
+        className={TableauCss.button}
+        onClick={() => props.onClick()}
+      >
+        {props.name}
       </ButtonDiv>
     </li>
+  );
+}
+
+VisibilityButton.propTypes = {
+  id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
+};
+
+function VisibilityMenu(props) {
+  const { onToggleVisibility, onToggleBaseStats } = props;
+  const entries = props.deckSpecs.map(spec => (
+    <VisibilityButton
+      id={spec.id}
+      name={spec.name}
+      onClick={() => onToggleVisibility(spec.id)}
+    />
   ));
-  return <ul className={TableauCss.currentDeckList}>{entries}</ul>;
+  return (
+    <ul className={TableauCss.currentDeckList}>
+      <VisibilityButton id="0" name="Base Stats" onClick={onToggleBaseStats} />
+      {entries}
+    </ul>
+  );
 }
 
 VisibilityMenu.propTypes = {
   deckSpecs: PropTypes.arrayOf(PropTypes.object).isRequired,
   onToggleVisibility: PropTypes.func.isRequired,
+  onToggleBaseStats: PropTypes.func.isRequired,
 };
 
 class MainUI extends React.Component {
@@ -47,15 +72,22 @@ class MainUI extends React.Component {
     deckSpecs: storageValueProp(PropTypes.array).isRequired,
     deckVisible: storageValueProp(PropTypes.object).isRequired,
     modDeckHidden: storageValueProp(PropTypes.bool).isRequired,
+    showBaseStats: storageValueProp(PropTypes.bool).isRequired,
   }
 
-  state = { settingsVisible: true }
+  state = {
+    settingsVisible: true,
+  }
 
   tableau = React.createRef();
 
   handleDeckVisibilityToggle = (deckId) => {
     const mutation = deckVis => ({ ...deckVis, [deckId]: !deckVis[deckId] });
     this.props.deckVisible.mutate(mutation);
+  }
+
+  handleBaseStatsToggle = () => {
+    this.props.showBaseStats.mutate(showBase => !showBase);
   }
 
   handleSelectDecks = (deckSpecs, showModifierDeck, preserve) => {
@@ -89,12 +121,14 @@ class MainUI extends React.Component {
           <VisibilityMenu
             deckSpecs={this.props.deckSpecs.value}
             onToggleVisibility={this.handleDeckVisibilityToggle}
+            onToggleBaseStats={this.handleBaseStatsToggle}
           />
         </div>
         <Tableau
           deckSpecs={this.props.deckSpecs.value}
           deckVisible={this.props.deckVisible.value}
           modDeckHidden={this.props.modDeckHidden.value}
+          showBaseStats={this.props.showBaseStats.value}
           ref={this.tableau}
         />
       </React.Fragment>
@@ -114,5 +148,9 @@ export default withStorage(MainUI, {
   modDeckHidden: {
     path: 'mod_deck_hidden',
     deserialize: value => (typeof value === 'boolean' ? value : true),
+  },
+  showBaseStats: {
+    path: 'mod_deck_hidden',
+    deserialize: value => (typeof value === 'boolean' ? value : false),
   },
 });

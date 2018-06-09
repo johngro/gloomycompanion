@@ -5,6 +5,65 @@ $card-ratio: $card-width / 296px;
   display: none;
 }
 
+.ability-deck-container {
+  max-width: 100vw;
+}
+
+.row-container {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.base-stats {
+  font-family: 'Nyala', 'Sakkal Majalla', 'Philosopher', sans-serif;
+  font-size: 85%;
+
+  // Styles for the stats icon table (right of card)
+  table {
+    border-spacing: 0;
+  }
+
+  .base-stat-id {
+    text-align: center;
+  }
+
+  .base-stat-left {
+    text-align: right;
+  }
+
+  .base-stat-right {
+    text-align: left;
+  }
+
+  // Style for the separator between int and bool stats (right of card).
+  hr {
+    border-style: solid;
+    margin: 0;
+  }
+
+  // Styles for the stats list (below card)
+  ul {
+    list-style: none;
+    margin: 0;
+  }
+
+  // Styles for icons used by the base stats display.
+  .int-stat-icon {
+    height: .75em;
+    vertical-align: baseline;
+  }
+
+  .bool-stat-icon {
+    height: .85em;
+    margin-right: .15em;
+    vertical-align: baseline;
+  }
+
+  .invert-icon {
+    filter: invert(100%);
+  }
+}
+
 @media only screen and (min-height: 500px) and (orientation: portrait) {
   .card-container {
     max-width: 33vh * $card-ratio;
