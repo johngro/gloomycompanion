@@ -5,6 +5,39 @@ $card-ratio: $card-width / 296px;
   display: none;
 }
 
+.base-stat-table {
+  font-family: 'Nyala', 'Sakkal Majalla', 'Philosopher', sans-serif;
+  font-size: 85%;
+}
+
+.boss-extras {
+  font-family: 'Nyala', 'Sakkal Majalla', 'Philosopher', sans-serif;
+  font-size: 85%;
+  list-style: none;
+  margin: 0px;
+}
+
+%stat-icon {
+  height: 1em;
+  vertical-align: middle;
+}
+
+.base-stat-icon {
+  @extend %stat-icon;
+  -webkit-filter: invert(100%);
+  filter: invert(100%);
+}
+
+.immunity-icon {
+  @extend %stat-icon;
+  margin-right: 0.15em;
+}
+
+.row-container {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
 @media only screen and (min-height: 500px) and (orientation: portrait) {
   .card-container {
     max-width: 33vh * $card-ratio;

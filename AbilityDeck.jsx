@@ -12,6 +12,22 @@ import { MONSTER_STATS } from './monster_stats';
 
 import * as css from './style/Card.scss';
 
+function StatIcon(props) {
+  const parse = /^%?([^%]+)%?$/;
+  const match = parse.exec(props.name);
+  const imgSource = `images/${match[1]}.svg`;
+  return <img className={props.className} src={imgSource} alt="" />;
+}
+
+StatIcon.defaultProps = {
+  className: null,
+};
+
+StatIcon.propTypes = {
+  name: PropTypes.string.isRequired,
+  className: PropTypes.string,
+};
+
 export default function AbilityDeck(props) {
   // FIXME: Reshuffle animation
   // FIXME: Draw animation repeats when unhiding
@@ -24,6 +40,7 @@ export default function AbilityDeck(props) {
   let range = [0, 0];
   let health = [0, 0];
   let extra_lines = [];
+  let attributes = [];
   const isBoss = spec.class === DECKS.Boss.class;
   if (isBoss && spec.name !== 'Boss') {
     const bossName = spec.name.replace('Boss: ', '');
@@ -44,7 +61,7 @@ export default function AbilityDeck(props) {
     move = [stats.normal.move, stats.elite.move];
     range = [stats.normal.range, stats.elite.range];
     health = [stats.normal.health, stats.elite.health];
-    const attributes = [stats.normal.attributes, stats.elite.attributes];
+    attributes = [stats.normal.attributes, stats.elite.attributes];
     extra_lines = extra_lines.concat(attributes_to_lines(attributes));
   }
 
@@ -86,22 +103,105 @@ export default function AbilityDeck(props) {
     );
   };
 
+  const renderBaseStats = () => {
+    if (!props.showBaseStats) {
+      return null;
+    }
+
+    const statLine = (iconName, data) => {
+      const bossData = (data.length === 1);
+      const empty = (data[0] === 0) && (bossData || (data[1] === 0));
+      if (empty) {
+        return null;
+      }
+
+      const value = bossData ? String(data[0]) : `${data[0]}/${data[1]}`;
+      return (
+        <tr>
+          <td><StatIcon name={iconName} className={css.baseStatIcon} /></td>
+          <td>{value}</td>
+        </tr>
+      );
+    };
+
+    const attr_parse = /^%(\S+)%(\s+([0-9]+))?/;
+    const attr_dict = { };
+    for (const i in attributes) {
+      for (const j in attributes[i]) {
+        const match = attr_parse.exec(attributes[i][j]);
+        if (match) {
+          const name = match[1];
+          if (!(name in attr_dict)) {
+            attr_dict[name] = [0, 0];
+          }
+          attr_dict[name][i] = match[3] ? match[3] : 1;
+        }
+      }
+    }
+
+    const attr_lines = Object.keys(attr_dict).map(key =>
+      statLine(key, attr_dict[key]));
+    return (
+      <table className={css.baseStatTable}>
+        { statLine('heal', health) }
+        { statLine('move', move) }
+        { statLine('attack', attack) }
+        { statLine('range', range) }
+        {attr_lines}
+      </table>
+    );
+  };
+
+  const renderBossExtras = () => {
+    const immLine = () => {
+      if (!stats.immunities) {
+        return null;
+      }
+
+      const Icon = x => <StatIcon name={x} className={css.immunityIcon} />;
+      const icons = stats.immunities
+        ? Object.keys(stats.immunities).map(key => Icon(stats.immunities[key]))
+        : null;
+      return (
+        <li>Immunities: {icons}</li>
+      );
+    };
+
+    const notes = () => (stats.notes ? <li>{stats.notes}</li> : null);
+
+    return (
+      <ul className={css.bossExtras}>
+        { immLine() }
+        { notes() }
+      </ul>
+    );
+  };
+
   const [topDraw] = props.deckState.draw_pile;
   const [topDiscard, sndDiscard] = props.deckState.discard;
   return (
-    <ButtonDiv
-      className={props.hidden ? css.hiddenDeck : css.cardContainer}
-      onClick={props.onClick}
+    <div
+      className={props.hidden ? css.hiddenDeck : null}
     >
-      {topDraw ? renderCard(topDraw, -7, [css.draw], false) : null}
-      {topDiscard ? renderCard(topDiscard, -3, [css.discard, css.pull], true) : null}
-      {sndDiscard ? renderCard(sndDiscard, -4, [css.discard, css.lift], true) : null}
-    </ButtonDiv>
+      <div className={css.rowContainer}>
+        <ButtonDiv
+          className={css.cardContainer}
+          onClick={props.onClick}
+        >
+          {topDraw ? renderCard(topDraw, -7, [css.draw], false) : null}
+          {topDiscard ? renderCard(topDiscard, -3, [css.discard, css.pull], true) : null}
+          {sndDiscard ? renderCard(sndDiscard, -4, [css.discard, css.lift], true) : null}
+        </ButtonDiv>
+        { props.showBaseStats ? renderBaseStats() : null }
+      </div>
+      { props.showBaseStats ? renderBossExtras() : null }
+    </div>
   );
 }
 
 AbilityDeck.defaultProps = {
   hidden: false,
+  showBaseStats: false,
 };
 
 AbilityDeck.propTypes = {
@@ -114,4 +214,5 @@ AbilityDeck.propTypes = {
   deckState: PropTypes.instanceOf(DeckState).isRequired,
   onClick: PropTypes.func.isRequired,
   hidden: PropTypes.bool,
+  showBaseStats: PropTypes.bool,
 };
