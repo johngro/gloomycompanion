@@ -23,8 +23,8 @@ function refresh_ui() {
 
   const tableau = document.getElementById(css.tableau);
   const cards = tableau.getElementsByClassName(CardCss.card);
-  for (let i = 1; i < cards.length; i += 1) {
-    if (cards[i].className.indexOf(CardCss.ability) !== -1) {
+  for (let i = 0; i < cards.length; i += 1) {
+    if (cards[i].className.indexOf(CardCss.ability) !== -1 && cards[i].offsetParent !== null) {
       const scale = cards[i].getBoundingClientRect().height / actual_card_height;
       const scaled_font_size = base_font_size * scale;
 
