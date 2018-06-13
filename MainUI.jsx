@@ -26,12 +26,10 @@ SettingsButton.propTypes = {
 };
 
 function VisibilityMenu(props) {
+  const { onToggleVisibility } = props;
   const entries = props.deckSpecs.map(spec => (
     <li className={TableauCss.currentDeck} key={spec.id}>
-      <ButtonDiv
-        className={TableauCss.button}
-        onClick={() => props.onToggleVisibility(spec.id)}
-      >
+      <ButtonDiv className={TableauCss.button} onClick={() => onToggleVisibility(spec.id)}>
         {spec.name}
       </ButtonDiv>
     </li>

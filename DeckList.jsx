@@ -63,6 +63,7 @@ export default class DeckList extends React.Component {
   render() {
     const deckElements = Object.values(DECKS).map(({ name }) => (
       <li key={name}>
+        {/* eslint-disable-next-line jsx-a11y/label-has-for */}
         <label>
           <input
             name="deck"
